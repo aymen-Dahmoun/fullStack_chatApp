@@ -2,10 +2,15 @@ import express from 'express';
 import cors from 'cors';
 import http from 'http';
 import { Server } from 'socket.io';
+import { syncDatabase } from './models/index.js';
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+syncDatabase().then(() => {
+    console.log('Database synced successfully.');}).catch((err) => {
+    console.error('Error syncing database:', err);});
 
 const server = http.createServer(app);
 
