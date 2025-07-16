@@ -3,10 +3,12 @@ import cors from 'cors';
 import http from 'http';
 import { Server } from 'socket.io';
 import { syncDatabase } from './models/index.js';
+import authRouter from './routes/auth.routes.js';
 
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.use('/api/auth', authRouter)
 
 syncDatabase().then(() => {
     console.log('Database synced successfully.');}).catch((err) => {
