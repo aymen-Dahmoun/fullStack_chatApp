@@ -1,19 +1,23 @@
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/db.js';
 
-const Message = sequelize.define('Message', {
+const Conversation = sequelize.define('Conversation', {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
-  content: {
+  userId: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
+  messengerId: {
     type: DataTypes.TEXT,
     allowNull: false,
   },
 }, {
-  tableName: 'messages',
+  tableName: 'conversation',
   timestamps: true,
 });
 
-export default Message;
+export default Conversation;

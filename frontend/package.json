@@ -9,10 +9,23 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-navigation/native": "^7.1.14",
+    "@react-navigation/stack": "^7.4.2",
     "expo": "~53.0.17",
     "expo-status-bar": "~2.2.3",
+    "nativewind": "^4.1.23",
+    "prettier-plugin-tailwindcss": "^0.5.11",
     "react": "19.0.0",
-    "react-native": "0.79.5"
+    "react-native": "0.79.5",
+    "react-native-gesture-handler": "^2.27.1",
+    "react-native-paper": "^5.14.5",
+    "react-native-reanimated": "^3.18.0",
+    "react-native-safe-area-context": "^5.5.2",
+    "react-native-screens": "^4.13.0",
+    "react-native-vector-icons": "^10.2.0",
+    "react-native-webrtc": "^124.0.5",
+    "socket.io-client": "^4.8.1",
+    "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

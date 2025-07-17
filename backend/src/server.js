@@ -3,14 +3,14 @@ import cors from 'cors';
 import http from 'http';
 import { syncDatabase } from './models/index.js';
 import authRouter from './routes/auth.routes.js';
-import messageRouter from './routes/message.route.js';
+import conversationRouter from './routes/conversation.route.js';
 import { initSocket } from './sockets/index.js';
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.use('/api/auth', authRouter);
-app.use('api/messages', messageRouter)
+app.use('api/conversation/:userId', conversationRouter)
 
 syncDatabase()
     .then(() => console.log('Database synced successfully.'))
