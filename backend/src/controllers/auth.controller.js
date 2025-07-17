@@ -1,5 +1,5 @@
 import User from "../models/user.js";
-import { hashPassword } from "../utils/hashPassword.js";
+import { hashPassword } from "../services/hashPassword.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 

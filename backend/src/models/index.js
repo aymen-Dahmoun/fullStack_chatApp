@@ -2,7 +2,7 @@ import sequelize from '../config/db.js';
 import User from './user.js';
 import Message from './message.js';
 
-User.hasMany(Message, { foreignKey: 'senderId', as: 'sentMessages' });
+User.hasMany(Message, { foreignKey: 'senderId', as: 'messages' });
 Message.belongsTo(User, { foreignKey: 'senderId', as: 'sender' });
 
 const syncDatabase = async () => {
