@@ -25,6 +25,9 @@
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
+    },
+    "extra": {
+      "API_LINK": "http://localhost:5000"
     }
   }
 }
