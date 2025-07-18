@@ -8,7 +8,7 @@ const Conversation = sequelize.define('Conversation', {
     primaryKey: true,
   },
   userId: {
-    type: DataTypes.TEXT,
+    type: DataTypes.UUID,
     allowNull: false,
   },
   messengerId: {
