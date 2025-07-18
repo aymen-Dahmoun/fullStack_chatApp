@@ -6,13 +6,14 @@ import authRouter from './routes/auth.routes.js';
 import sessionRouter from './routes/session.route.js';
 import conversationRouter from './routes/conversation.route.js';
 import { initSocket } from './sockets/index.js';
+import checkSession from './middlewares/session.middleware.js';
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.use('/api/auth', authRouter);
-app.use('/api', sessionRouter);
-app.use('api/conversation/:userId', conversationRouter)
+app.use('/api', checkSession, sessionRouter);
+app.use('/api/conversation/:userId', conversationRouter)
 
 syncDatabase()
     .then(() => console.log('Database synced successfully.'))

@@ -1,4 +1,6 @@
 import api from "../api/ax.js";
+import * as SecureStore from 'expo-secure-store';
+
 
 export const registerWithCredentials = async (data) => {
     try {
@@ -16,6 +18,8 @@ export const loginWithCredentials = async (data) => {
     try {
         const response = await api.post('/api/auth/login', data);
         console.log('Login response:', response.data);
+        await SecureStore.setItemAsync('token', response.data.token);
+        await SecureStore.setItemAsync('user', JSON.stringify(response.data.user));
         return response.data;
     } catch (error) {
         console.error('Login error:', error.response?.data || error.message);
