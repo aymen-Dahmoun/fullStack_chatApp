@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from "react-native";
 import { Button, TextInput } from "react-native-paper";
 import { loginWithCredentials, registerWithCredentials } from "../../utils/auth.utils";
 
-export default function RegisterScreen() {
+export default function LoginScreen() {
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
   const [password, setPassword] = useState('');
 
