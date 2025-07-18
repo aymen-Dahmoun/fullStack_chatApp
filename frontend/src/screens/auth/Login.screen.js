@@ -1,10 +1,64 @@
+import { StatusBar } from "expo-status-bar";
+import { useState } from "react";
+import { View, Text, StyleSheet } from "react-native";
+import { Button, TextInput } from "react-native-paper";
+import { loginWithCredentials, registerWithCredentials } from "../../utils/auth.utils";
 
+export default function RegisterScreen() {
+  const [usernameOrEmail, setUsernameOrEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-export default function LoginScreen() {
   return (
-    <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
-      <Text className="text-black dark:text-white">Login Screen</Text>
+    <View style={styles.container}>
       <StatusBar style="auto" />
+      <Text style={styles.title}>Login Screen</Text>
+      
+      <TextInput
+        label="username or email"
+        mode="outlined"
+        value={usernameOrEmail}
+        onChangeText={setUsernameOrEmail}
+        style={styles.input}
+      />
+      <TextInput
+        label="Password"
+        mode="outlined"
+        value={password}
+        onChangeText={setPassword}
+        style={styles.input}
+      />
+      <Button 
+        mode="contained"
+        onPress={() => loginWithCredentials({ email: usernameOrEmail, password, username: usernameOrEmail })}
+      >
+        Login
+      </Button>
+      <Button 
+        mode="outlined"
+        onPress={() => console.log('Register pressed') }
+        style={{ marginTop: 16 }}
+        >
+        Register
+        </Button>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+  },
+  title: {
+    color: "#000",
+    marginBottom: 16,
+    fontSize: 24,
+  },
+  input: {
+    width: 320,
+    marginBottom: 16,
+    height: 48,
+  },
+});

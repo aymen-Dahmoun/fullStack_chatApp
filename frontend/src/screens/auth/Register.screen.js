@@ -2,7 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Button, TextInput } from "react-native-paper";
-import { register } from "../../utils/auth.utils";
+import { registerWithCredentials } from "../../utils/auth.utils";
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState('');
@@ -36,13 +36,13 @@ export default function RegisterScreen() {
       />
       <Button 
         mode="contained"
-        onPress={() => console.log('Login pressed')}
+        onPress={() => registerWithCredentials({ email, password, username })}
       >
         Register
       </Button>
       <Button 
         mode="outlined"
-        onPress={() => register({ email, password, username })}
+        onPress={() => console.log('Login pressed') }
         style={{ marginTop: 16 }}
         >
         Login
