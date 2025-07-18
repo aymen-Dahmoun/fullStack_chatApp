@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = "temp_secret_key";
-const JWT_EXPIRES_IN = "1h";
+const JWT_EXPIRES_IN = "7d";
 
 export const register = async (req, res) => {
     try {

@@ -27,7 +27,7 @@
       "bundler": "metro"
     },
     "extra": {
-      "API_LINK": "http://localhost:5000"
+      "API_LINK": "http://your IP address :5000"
     }
   }
 }
