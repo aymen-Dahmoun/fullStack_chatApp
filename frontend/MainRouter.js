@@ -7,6 +7,7 @@ import LoginScreen from "./src/screens/auth/Login.screen";
 import RegisterScreen from "./src/screens/auth/Register.screen";
 import NavBar from "./src/comps/NavBar";
 import { useAuth } from "./src/context/authContext";
+import ListScreen from "./src/screens/chat/List.screen";
 
 const Stack = createStackNavigator();
 
@@ -19,14 +20,7 @@ const AuthStack = () => (
 
 const UserStack = () => (
   <Stack.Navigator initialRouteName="Messages">
-    <Stack.Screen
-      name="Messages"
-      component={() => (
-        <View>
-          <Text>Messages Screen</Text>
-        </View>
-      )}
-    />
+    <Stack.Screen name="Messages" component={ListScreen} />
     <Stack.Screen
       name="Profile"
       component={() => (
@@ -39,14 +33,17 @@ const UserStack = () => (
 );
 
 export default function MainRouter() {
-  const { user, loading } = useAuth();
+  // const { user, loading } = useAuth();
 
-  if (loading) return null; // or a loading spinner
+  // if (loading) return null; // or a loading spinner
 
   return (
     <NavigationContainer>
-      {user ? <AuthStack /> : <AuthStack />}
-      {!user && <NavBar />}
+      {/* {user ? <AuthStack /> : <AuthStack />}
+      {!user && <NavBar />} */}
+      {true ? <UserStack /> : <AuthStack />}
+      {<NavBar />}
+
     </NavigationContainer>
   );
 }

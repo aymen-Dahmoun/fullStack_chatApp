@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(cors());
 app.use('/api/auth', authRouter);
 app.use('/api', checkSession, sessionRouter);
-app.use('/api/conversation/:userId', conversationRouter)
+app.use('/api/conversation', conversationRouter)
 
 syncDatabase()
     .then(() => console.log('Database synced successfully.'))
