@@ -24,7 +24,7 @@ export const register = async (req, res) => {
             return res.status(400).json({ error: "Email already in use" });
         }
 
-        const hashedPassword = await hashPassword(password);
+        const hashedPassword = password //wait hashPassword(password);
 
         const newUser = await User.create({
             username,
@@ -65,7 +65,7 @@ export const login = async (req, res) => {
             return res.status(404).json({ error: "User not found" });
         }
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
+        const isPasswordValid = password === user.password //await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
             return res.status(401).json({ error: "Invalid password" });
         }

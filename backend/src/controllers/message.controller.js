@@ -22,13 +22,25 @@ export const getConversations = async (req, res) => {
       order: [['updatedAt', 'DESC']],
     });
 
-    // Optionally sort messages manually if needed
-    const sorted = conversations.map(convo => ({
-      ...convo.toJSON(),
-      messages: convo.messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    }));
+    const formatted = conversations.map(convo => {
+      const sortedMessages = convo.messages.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const lastMessage = sortedMessages[0];
 
-    res.status(200).json(sorted);
+      return {
+        conversationId: convo.id,
+        updatedAt: convo.updatedAt,
+        lastMessage: lastMessage ? {
+          content: lastMessage.content,
+          createdAt: lastMessage.createdAt,
+          sender: lastMessage.sender
+        } : null,
+        messenger: {
+          id: convo.messengerId,
+        }
+      };
+    });
+
+    res.status(200).json(formatted);
   } catch (error) {
     console.error("Error fetching conversations:", error);
     res.status(500).json({ error: "Internal server error" });
