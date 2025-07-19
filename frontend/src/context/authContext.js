@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
 useEffect(() => {
+
   const checkSession = async () => {
     setLoading(true);
     try {

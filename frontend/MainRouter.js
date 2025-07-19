@@ -8,6 +8,7 @@ import RegisterScreen from "./src/screens/auth/Register.screen";
 import NavBar from "./src/comps/NavBar";
 import { useAuth } from "./src/context/authContext";
 import ListScreen from "./src/screens/chat/List.screen";
+import { ActivityIndicator } from "react-native-paper";
 
 const Stack = createStackNavigator();
 
@@ -33,16 +34,16 @@ const UserStack = () => (
 );
 
 export default function MainRouter() {
-  // const { user, loading } = useAuth();
+  const { user, loading } = useAuth();
 
-  // if (loading) return null; // or a loading spinner
+  if (loading) return <ActivityIndicator size={'large'}></ActivityIndicator>; // or a loading spinner
 
   return (
     <NavigationContainer>
-      {/* {user ? <AuthStack /> : <AuthStack />}
-      {!user && <NavBar />} */}
-      {true ? <UserStack /> : <AuthStack />}
-      {<NavBar />}
+      {user ? <UserStack /> : <AuthStack />}
+      {!user && <NavBar />}
+      {/* {true ? <UserStack /> : <AuthStack />}
+      {<NavBar />} */}
 
     </NavigationContainer>
   );
