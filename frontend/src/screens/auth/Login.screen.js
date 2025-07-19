@@ -8,6 +8,7 @@ import { useAuth } from "../../context/authContext";
 import neonCircle from '../../../assets/nnneonCircle.png'
 import neonPattern from '../../../assets/qqquad.png'
 import neonTriangle from '../../../assets/NeonTriangle.png'
+import AuthBackground from "../../comps/AuthBackground.js";
 
 export default function LoginScreen() {
   const [usernameOrEmail, setUsernameOrEmail] = useState('');
@@ -32,18 +33,8 @@ export default function LoginScreen() {
     <View className="flex-1 bg-gradient-to-br from-slate-50 to-blue-50 px-6 justify-center">
       <StatusBar style="dark" />
 
-      <Image
-        source={neonPattern}
-        className="absolute left-10 opacity-20"
-      />
-      <Image
-        source={neonCircle}
-        className="absolute top-56 opacity-45"
-      />
-      <Image
-        source={neonTriangle}
-        className="absolute bottom-56 right-1 opacity-60"
-      />
+      <AuthBackground mainImage={neonPattern} secondImage={neonCircle} thirdImage={neonTriangle} />
+
 
       <View className="top-16 w-full items-center self-center px-8">
         <Text className="text-4xl font-bold text-center text-slate-800 mb-2">

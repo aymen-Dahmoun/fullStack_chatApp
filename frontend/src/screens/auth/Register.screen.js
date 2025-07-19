@@ -8,6 +8,7 @@ import neonCircle from '../../../assets/nnneonCircle.png'
 import neonPattern from '../../../assets/qqquad.png'
 import neonTriangle from '../../../assets/NeonTriangle.png'
 import neonHex from '../../../assets/nnneonHex.png'
+import AuthBackground from "../../comps/AuthBackground";
 
 
 export default function RegisterScreen() {
@@ -28,24 +29,8 @@ export default function RegisterScreen() {
   return (
     <View className="flex-1 bg-gradient-to-br from-slate-50 to-blue-50 px-6 justify-center">
       <StatusBar style="dark" />
-
-      {/* Background Images */}
-      <Image
-        source={neonPattern}
-        className="absolute left-10 opacity-20"
-      />
-        <Image
-          source={neonTriangle}
-          className="absolute top-72 opacity-45"
-        />
-      <Image
-        source={neonCircle}
-        className="absolute top-12 right-12 opacity-60"
-      />
-      <Image
-        source={neonHex}
-        className="absolute bottom-72 left-12 opacity-60"
-      />
+      
+      <AuthBackground mainImage={neonPattern} secondImage={neonTriangle} thirdImage={neonHex} />
 
       <View className=" top-16 w-full items-center self-center px-8">
         <Text className="text-4xl font-bold text-center text-slate-800 mb-2">
@@ -69,26 +54,11 @@ export default function RegisterScreen() {
             mode="outlined"
             value={username}
             onChangeText={setUsername}
-            style={{
-              width: '90%',
-              marginBottom: 16,
-              backgroundColor: 'rgba(255, 255, 255, 0.6)'
-            }}
-            outlineStyle={{
-              borderRadius: 8,
-              borderWidth: 1.5,
-              borderColor: '#0c5991'
-            }}
-            contentStyle={{
-              fontSize: 16,
-              color: '#334155'
-            }}
+            style={{ width: '90%', marginBottom: 16, backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
+            outlineStyle={{ borderRadius: 8, borderWidth: 1.5, borderColor: '#0c5991' }}
+            contentStyle={{ fontSize: 16, color: '#334155' }}
             right={<TextInput.Icon icon="account" iconColor="#64748b" />}
-            theme={{
-              colors: {
-                primary: '#0c5991',
-                onSurfaceVariant: '#64748b'
-              }
+            theme={{ colors: { primary: '#0c5991', onSurfaceVariant: '#64748b' }
             }}
           />
 
@@ -97,26 +67,11 @@ export default function RegisterScreen() {
             mode="outlined"
             value={email}
             onChangeText={setEmail}
-            style={{
-              width: '90%',
-              marginBottom: 16,
-              backgroundColor: 'rgba(255, 255, 255, 0.6)'
-            }}
-            outlineStyle={{
-              borderRadius: 8,
-              borderWidth: 1.5,
-              borderColor: '#0c5991'
-            }}
-            contentStyle={{
-              fontSize: 16,
-              color: '#334155'
-            }}
+            style={{ width: '90%', marginBottom: 16, backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
+            outlineStyle={{ borderRadius: 8, borderWidth: 1.5, borderColor: '#0c5991' }}
+            contentStyle={{ fontSize: 16, color: '#334155' }}
             right={<TextInput.Icon icon="email" iconColor="#64748b" />}
-            theme={{
-              colors: {
-                primary: '#0c5991',
-                onSurfaceVariant: '#64748b'
-              }
+            theme={{ colors: { primary: '#0c5991', onSurfaceVariant: '#64748b' }
             }}
           />
 
@@ -126,26 +81,11 @@ export default function RegisterScreen() {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            style={{
-              width: '90%',
-              marginBottom: 24,
-              backgroundColor: 'rgba(255, 255, 255, 0.6)'
-            }}
-            outlineStyle={{
-              borderRadius: 8,
-              borderWidth: 1.5,
-              borderColor: '#0c5991'
-            }}
-            contentStyle={{
-              fontSize: 16,
-              color: '#334155'
-            }}
+            style={{ width: '90%', marginBottom: 24, backgroundColor: 'rgba(255, 255, 255, 0.6)' }}
+            outlineStyle={{ borderRadius: 8, borderWidth: 1.5, borderColor: '#0c5991' }}
+            contentStyle={{ fontSize: 16, color: '#334155' }}
             right={<TextInput.Icon icon="lock" iconColor="#64748b" />}
-            theme={{
-              colors: {
-                primary: '#0c5991',
-                onSurfaceVariant: '#64748b'
-              }
+            theme={{ colors: { primary: '#0c5991', onSurfaceVariant: '#64748b' }
             }}
           />
 
@@ -153,21 +93,9 @@ export default function RegisterScreen() {
             mode="contained"
             icon="account-plus"
             onPress={handleRegister}
-            style={{
-              backgroundColor: '#0c5991',
-              width: '90%', 
-              borderRadius: 8,
-              marginTop: 56
-            }}
-            labelStyle={{
-              fontSize: 18,
-              fontWeight: '600',
-              color: 'white',
-              letterSpacing: 0.5
-            }}
-            contentStyle={{
-              height: 56
-            }}
+            style={{ backgroundColor: '#0c5991', width: '90%',  borderRadius: 8, marginTop: 56 }}
+            labelStyle={{ fontSize: 18, fontWeight: '600', color: 'white', letterSpacing: 0.5 }}
+            contentStyle={{ height: 56 }}
           >
             Register
           </Button>
@@ -175,15 +103,8 @@ export default function RegisterScreen() {
           <Button
             mode="text"
             onPress={() => navigation.navigate('Login')}
-            style={{
-              marginTop: 20,
-            }}
-            labelStyle={{
-              fontSize: 14,
-              fontWeight: '500',
-              color: '#0c5991',
-              textDecorationLine: 'underline'
-            }}
+            style={{ marginTop: 20 }}
+            labelStyle={{ fontSize: 14, fontWeight: '500', color: '#0c5991', textDecorationLine: 'underline' }}
           >
             Already have an account? Login
           </Button>

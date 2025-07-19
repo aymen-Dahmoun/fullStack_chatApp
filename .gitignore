@@ -17,3 +17,5 @@ Thumbs.db
 # Build output
 dist/
 build/
+
+app.json
