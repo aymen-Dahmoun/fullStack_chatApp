@@ -2,7 +2,6 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 
-console.log("API base URL:", Constants.expoConfig.extra.API_LINK);
 const api = axios.create({
   baseURL: Constants.expoConfig.extra.API_LINK || 'http://localhost:5000',
   timeout: 10000,

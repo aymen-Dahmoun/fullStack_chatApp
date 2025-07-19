@@ -9,6 +9,8 @@ import NavBar from "./src/comps/NavBar";
 import { useAuth } from "./src/context/authContext";
 import ListScreen from "./src/screens/chat/List.screen";
 import { ActivityIndicator } from "react-native-paper";
+import MainLayout from "./src/comps/MainLayout";
+import ChatScreen from "./src/screens/chat/Chat.screen";
 
 const Stack = createStackNavigator();
 
@@ -21,15 +23,21 @@ const AuthStack = () => (
 
 const UserStack = () => (
   <Stack.Navigator initialRouteName="Messages">
-    <Stack.Screen name="Messages" component={ListScreen} />
+    <Stack.Screen name="Messages" component={
+      ()=>(
+        <MainLayout>
+          <ListScreen/>
+        </MainLayout>
+      )
+      } />
     <Stack.Screen
-      name="Profile"
-      component={() => (
-        <View>
-          <Text>Profile Screen</Text>
-        </View>
+      name="Chat"
+      component={(props) => (
+        <MainLayout>
+          <ChatScreen {...props} />
+        </MainLayout>
       )}
-    />
+      />
   </Stack.Navigator>
 );
 
@@ -41,7 +49,6 @@ export default function MainRouter() {
   return (
     <NavigationContainer>
       {user ? <UserStack /> : <AuthStack />}
-      {!user && <NavBar />}
       {/* {true ? <UserStack /> : <AuthStack />}
       {<NavBar />} */}
 

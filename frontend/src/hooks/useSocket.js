@@ -1,4 +1,3 @@
-// hooks/useSocket.js
 import { useEffect, useState, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import * as SecureStore from 'expo-secure-store';
