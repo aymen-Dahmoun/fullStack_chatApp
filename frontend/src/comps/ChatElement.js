@@ -18,7 +18,7 @@ export default function ChatElement({ item }) {
 
     return (
       <TouchableOpacity 
-        onPress={()=>navigation.navigate('Chat', {conversationId: item.conversationId})}
+        onPress={()=>navigation.navigate('Chat', {conversationId: item.conversationId, messenger: item.messenger})}
       >
         <View className="flex-row justify-between items-center bg-white p-4 m-2 shadow-md">
           <View

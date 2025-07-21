@@ -1,3 +1,5 @@
+// hooks/useChat.js
+
 import { useEffect, useState } from "react";
 import api from "../api/ax";
 
@@ -10,7 +12,7 @@ export default function useChat(conversationId) {
     const getConversations = async () => {
       try {
         const response = await api.get(`/api/conversation/chat/${conversationId}`);
-        console.log("convs: ", response.data);
+        console.log("convs from useChat: ", response.data);
         setData(response.data);
       } catch (err) {
         console.error("Failed to fetch conversations:", err);
@@ -23,5 +25,23 @@ export default function useChat(conversationId) {
     if (conversationId) getConversations(); // prevent undefined
   }, [conversationId]);
 
-  return { data, loading, error };
+  return {
+    data,
+    loading,
+    error,
+    refetch: () => {
+      setLoading(true);
+      setError(null);
+      return api
+        .get(`/api/conversation/chat/${conversationId}`)
+        .then((res) => {
+          setData(res.data);
+        })
+        .catch((err) => {
+          setError(err);
+        })
+        .finally(() => setLoading(false));
+    },
+    setMessages: setData // ✅ here is the fix
+  };
 }

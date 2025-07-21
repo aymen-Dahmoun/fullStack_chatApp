@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+const JWT_SECRET = "temp_secret_key"
 
 const socketAuth = (socket, next) => {
     const token = socket.handshake.auth.token;
@@ -9,7 +10,10 @@ const socketAuth = (socket, next) => {
         return next(err);
     }
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+        console.log('token: ', token)
+
+
         if (err) {
             const authError = new Error('Authentication error: Invalid token');
             authError.data = { content: 'Token invalid or expired' };

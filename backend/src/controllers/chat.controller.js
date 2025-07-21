@@ -17,7 +17,7 @@ export const getChat = async (req, res) => {
           attributes: ['id', 'username', 'email'],
         },
       ],
-      order: [['createdAt', 'ASC']],
+      order: [['createdAt', 'DESC']],
     });
 
     res.status(200).json(messages);
