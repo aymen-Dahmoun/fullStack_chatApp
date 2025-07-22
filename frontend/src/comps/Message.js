@@ -1,6 +1,7 @@
 import { View, Text } from "react-native";
+import { Icon, TextInput } from "react-native-paper";
 
-export default function Message({ content, senderName, isSignedUser, timestamp }) {
+export default function Message({ content, senderName, isSignedUser, timestamp, isPending }) {
   return (
     <View
       className={`max-w-[80%] my-1 p-2 rounded-xl ${
@@ -14,6 +15,7 @@ export default function Message({ content, senderName, isSignedUser, timestamp }
       <Text className="text-gray-300 text-[10px] text-right mt-1">
         {new Date(timestamp).toLocaleTimeString()}
       </Text>
+      {isPending && isSignedUser && (<Icon source="upload" color="#64748b" size={2} />)}
     </View>
   );
 }

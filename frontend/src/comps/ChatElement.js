@@ -1,6 +1,7 @@
 import { useNavigation } from "@react-navigation/native";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Divider } from "react-native-paper";
+import ProfileIcon from "./ProfileIcon";
 
 
 export default function ChatElement({ item }) {
@@ -20,25 +21,20 @@ export default function ChatElement({ item }) {
       <TouchableOpacity 
         onPress={()=>navigation.navigate('Chat', {conversationId: item.conversationId, messenger: item.messenger})}
       >
-        <View className="flex-row justify-between items-center bg-white p-4 m-2 shadow-md">
-          <View
-            className='w-11 h-11 mr-2 items-center justify-center bg-slate-500 rounded-3xl'
-          >
-            <Text className='text-white text-sm font-bold' >{username[0]}</Text>
-          </View>
+        <View className="flex-row justify-between items-center bg-transparent pr-4 pl-4 pb-6 m-2">
+          <ProfileIcon username={username} />
           <View className="flex-1 pr-2">
-            <Text className="text-lg font-semibold text-gray-900">
+            <Text className="text-xl font-bold text-gray-900">
               {username}
             </Text>
-            <Text className="text-sm text-gray-500" numberOfLines={1}>
+            <Text className="text-lg text-gray-500" numberOfLines={1}>
               {message}
             </Text>
           </View>
-          <Text className="text-xs text-gray-400">
+          <Text className="text-lg text-gray-400">
             {formatTime(time)}
           </Text>
         </View>
-        <Divider style={{width:'95%'}} />
       </TouchableOpacity>    
     );
   };  
