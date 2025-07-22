@@ -8,7 +8,7 @@ export default function ChatElement({ item }) {
     
     const navigation = useNavigation();
 
-    const username = item.lastMessage?.sender?.username || "Unknown";
+    const username = item?.messenger?.username || "Unknown";
     const message = item.lastMessage?.content || "No messages yet";
     const time = item.lastMessage?.createdAt || item.updatedAt;
 

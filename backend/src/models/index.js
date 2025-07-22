@@ -9,6 +9,9 @@ Message.belongsTo(Conversation, { foreignKey: 'conversationId', as: 'conversatio
 Conversation.hasMany(Message, { foreignKey: 'conversationId', as: 'messages' });
 Message.belongsTo(User, { foreignKey: 'senderId', as: 'sender' });
 User.hasMany(Message, { foreignKey: 'senderId', as: 'sentMessages' });
+Conversation.belongsTo(User, { foreignKey: 'messengerId', as: 'messenger' });
+User.hasMany(Conversation, { foreignKey: 'messengerId', as: 'messengerConversations' });
+
 
 
 const syncDatabase = async () => {

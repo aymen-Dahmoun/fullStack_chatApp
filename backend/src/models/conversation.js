@@ -12,7 +12,7 @@ const Conversation = sequelize.define('Conversation', {
     allowNull: false,
   },
   messengerId: {
-    type: DataTypes.TEXT,
+    type: DataTypes.UUID,
     allowNull: false,
   },
 }, {
