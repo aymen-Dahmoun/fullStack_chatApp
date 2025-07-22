@@ -1,11 +1,18 @@
 import { sequelize } from "../models/index.js";
+import { Op } from "sequelize";
 
 export const getConversations = async (req, res) => {
   try {
     const userId = req.params.userId;
 
     const conversations = await sequelize.models.Conversation.findAll({
-      where: { userId },
+      where: {
+        [Op.or]: [
+          { userId: userId },
+          { messengerId: userId }
+        ]
+      },
+      
       include: [
         {
           model: sequelize.models.Message,
