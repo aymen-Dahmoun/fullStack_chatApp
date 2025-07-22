@@ -22,26 +22,13 @@ export default function useChat(conversationId) {
       }
     };
 
-    if (conversationId) getConversations(); // prevent undefined
+    getConversations();
   }, [conversationId]);
 
   return {
     data,
     loading,
     error,
-    refetch: () => {
-      setLoading(true);
-      setError(null);
-      return api
-        .get(`/api/conversation/chat/${conversationId}`)
-        .then((res) => {
-          setData(res.data);
-        })
-        .catch((err) => {
-          setError(err);
-        })
-        .finally(() => setLoading(false));
-    },
-    setMessages: setData // ✅ here is the fix
+    setMessages: setData
   };
 }
