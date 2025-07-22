@@ -9,7 +9,7 @@ import bg_image from '../../../assets/wwwhirl.png'
 export default function ListScreen() {
   const { data, loading, error } = useConversation();
 
-  if (loading) return <ActivityIndicator className="mt-10" />;
+  if (loading) return <ActivityIndicator size={80} className="mt-10 h-full" />;
   if (error)
     return (
       <Text className="text-red-500 text-center mt-4">

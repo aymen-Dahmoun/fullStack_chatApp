@@ -15,7 +15,6 @@ import Message from "../../comps/Message";
 import { useSocket } from "../../hooks/useSocket";
 import { Icon } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import MainLayout from "../../comps/MainLayout";
 
 export default function ChatScreen({ route }) {
   const conversationId = route?.params?.conversationId;
@@ -89,7 +88,7 @@ export default function ChatScreen({ route }) {
   }
 
   return (
-        <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
@@ -162,6 +161,6 @@ export default function ChatScreen({ route }) {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-      </SafeAreaView>
+    </SafeAreaView>
   );
 }

@@ -1,46 +1,48 @@
-import * as React from 'react';
-import { BottomNavigation } from 'react-native-paper';
+
+import React from 'react';
+import { View, TouchableOpacity, Text } from 'react-native';
 import { useNavigation, useNavigationState } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Icon } from 'react-native-paper';
 
 export default function NavBar() {
   const navigation = useNavigation();
-  const [index, setIndex] = React.useState(0);
-  const routeName = useNavigationState((state) => {
+  const currentRoute = useNavigationState((state) => state.routes[state.index].name);
+    const routeName = useNavigationState((state) => {
     const currentRoute = state.routes[state.index];
     return currentRoute.name;
   });
 
-  const [routes] = React.useState([
-    { key: 'messages', title: 'Messages', focusedIcon: 'message' },
-    { key: 'profile', title: 'Profile', focusedIcon: 'account' },
-  ]);
-
-  
   if (routeName === 'Chat') return null;
 
 
-
-  // Instead of rendering scenes, trigger navigation
-  const handleIndexChange = (newIndex) => {
-    setIndex(newIndex);
-
-    // Map keys to screen names
-    const keyToScreen = {
-      messages: 'Messages',
-      profile: 'Profile',
-    };
-
-    navigation.navigate(keyToScreen[routes[newIndex].key]);
-  };
-
+  const tabs = [
+    { name: 'Messages', icon: 'chat' },
+    { name: 'Profile', icon: 'account' },
+    { name: 'Settings', icon: 'cog' },
+  ];
 
   return (
-    <BottomNavigation
-      navigationState={{ index, routes }}
-      onIndexChange={handleIndexChange}
-      renderScene={()=>null}
-      style={{height:80, backgroundColor:'#000', maxHeight:80}}
-    />
+    <View className="h-20 bg-sky-700 flex-row border-t border-white/20">
+      {tabs.map((tab) => {
+        const isActive = currentRoute === tab.name;
+
+        return (
+          <TouchableOpacity
+            key={tab.name}
+            onPress={() => navigation.navigate(tab.name)}
+            className="flex-1 items-center justify-center"
+          >
+            <Icon
+              source={tab.icon}
+              color={isActive ? 'white' : 'lightgray'}
+              size={28}
+            />
+            <Text className={`text-xs mt-1 ${isActive ? 'text-white' : 'text-gray-300'}`}>
+              {tab.name}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
   );
 }
