@@ -32,9 +32,6 @@ export default function ChatScreen({ route }) {
     if (!socket || !conversationId) return;
 
 const handleIncomingMessage = (incoming) => {
-  console.log('sent: ', incoming);
-  console.log(incoming.conversationId !== conversationId)
-
   
   if (incoming.conversationId !== conversationId) return;
 
@@ -44,15 +41,12 @@ const handleIncomingMessage = (incoming) => {
     if (prev.some((msg) => msg.id === incoming.id)) return prev;
 
     if (isOwnMessage) {
-      // Replace the pending message
       return prev.map((msg) =>
         msg.tempId && msg.content === incoming.content
           ? { ...incoming, isPending: false }
           : msg
       );
     }
-
-    // Incoming from other user
     return [incoming, ...prev];
   });
 
@@ -60,21 +54,10 @@ const handleIncomingMessage = (incoming) => {
 };
 
 
-    const handleMessageSent = (sent) => {
-      console.log('sent: ', sent)
-      if (sent.conversationId !== conversationId) return;
-      setMessages((prev) =>
-        prev.map((msg) => (msg.tempId === sent.tempId ? sent : msg))
-      );
-      setIsSending(false);
-    };
-
     socket.on("chat message", handleIncomingMessage);
-    // socket.on("message sent", handleMessageSent);
 
     return () => {
       socket.off("chat message", handleIncomingMessage);
-      // socket.off("message sent", handleMessageSent);
     };
   }, [socket, conversationId]);
 
