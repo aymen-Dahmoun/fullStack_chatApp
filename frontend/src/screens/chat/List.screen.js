@@ -18,7 +18,7 @@ export default function ListScreen() {
     );
 
   return (
-    <SafeAreaView className="flex-1 bg-white px-2">
+    <View className="flex-1 bg-white px-2">
       <AuthBackground secondImage={bg_image} mainImage={bg_image} thirdImage={bg_image} />
       <FlatList
         data={data}
@@ -36,6 +36,6 @@ export default function ListScreen() {
         )}
         contentContainerStyle={{ paddingBottom: 20 }}
       />
-    </SafeAreaView>
+    </View>
   );
 }

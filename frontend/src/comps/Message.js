@@ -8,9 +8,7 @@ export default function Message({ content, senderName, isSignedUser, timestamp }
       }`}
     >
       {!isSignedUser && (
-        <Text className={`text-white text-xl mb-1 font-bold
-          ${isSignedUser ? 'text-white' : 'text-black'}
-        `}>{senderName}</Text>
+        <Text className='text-xl mb-1 font-bold'>{senderName}</Text>
       )}
       <Text className={` text-lg font-medium
         ${isSignedUser ? 'text-white' : 'text-black'}

@@ -31,15 +31,37 @@ export default function ChatScreen({ route }) {
   useEffect(() => {
     if (!socket || !conversationId) return;
 
-    const handleIncomingMessage = (incoming) => {
-      if (incoming.conversationId !== conversationId) return;
-      setMessages((prev) => {
-        if (prev.some((msg) => msg.id === incoming.id)) return prev;
-        return [incoming, ...prev];
-      });
-    };
+const handleIncomingMessage = (incoming) => {
+  console.log('sent: ', incoming);
+  console.log(incoming.conversationId !== conversationId)
+
+  
+  if (incoming.conversationId !== conversationId) return;
+
+  const isOwnMessage = incoming.sender?.id === user.id;
+
+  setMessages((prev) => {
+    if (prev.some((msg) => msg.id === incoming.id)) return prev;
+
+    if (isOwnMessage) {
+      // Replace the pending message
+      return prev.map((msg) =>
+        msg.tempId && msg.content === incoming.content
+          ? { ...incoming, isPending: false }
+          : msg
+      );
+    }
+
+    // Incoming from other user
+    return [incoming, ...prev];
+  });
+
+  setIsSending(false);
+};
+
 
     const handleMessageSent = (sent) => {
+      console.log('sent: ', sent)
       if (sent.conversationId !== conversationId) return;
       setMessages((prev) =>
         prev.map((msg) => (msg.tempId === sent.tempId ? sent : msg))
@@ -48,11 +70,11 @@ export default function ChatScreen({ route }) {
     };
 
     socket.on("chat message", handleIncomingMessage);
-    socket.on("message sent", handleMessageSent);
+    // socket.on("message sent", handleMessageSent);
 
     return () => {
       socket.off("chat message", handleIncomingMessage);
-      socket.off("message sent", handleMessageSent);
+      // socket.off("message sent", handleMessageSent);
     };
   }, [socket, conversationId]);
 
@@ -88,7 +110,7 @@ export default function ChatScreen({ route }) {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <View className="flex-1 bg-white">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
@@ -124,7 +146,7 @@ export default function ChatScreen({ route }) {
             />
         )}
 
-        <View className="flex-row items-center p-3 bg-white border-t border-gray-200">
+        <View className="flex-row items-center p-3 bg-white border-t pb-6 border-gray-200">
           <TextInput
             style={{
               borderWidth: 0.5,
@@ -161,6 +183,6 @@ export default function ChatScreen({ route }) {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }

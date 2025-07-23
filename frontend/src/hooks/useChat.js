@@ -12,7 +12,7 @@ export default function useChat(conversationId) {
     const getConversations = async () => {
       try {
         const response = await api.get(`/api/conversation/chat/${conversationId}`);
-        console.log("convs from useChat: ", response.data);
+        // console.log("convs from useChat: ", response.data);
         setData(response.data);
       } catch (err) {
         console.error("Failed to fetch conversations:", err);

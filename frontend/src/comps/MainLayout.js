@@ -6,7 +6,10 @@ import NavBar from "./NavBar";
 export default function MainLayout({children}){
 
     return(
-        <SafeAreaView className="flex-1 bg-white dark:bg-neutral-900">
+        <SafeAreaView 
+        className="flex-1 bg-white dark:bg-neutral-900"
+            edges={['bottom']}
+        >
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
