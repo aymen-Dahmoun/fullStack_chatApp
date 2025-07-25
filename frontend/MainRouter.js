@@ -12,6 +12,7 @@ import { ActivityIndicator } from "react-native-paper";
 import MainLayout from "./src/comps/MainLayout";
 import ChatScreen from "./src/screens/chat/Chat.screen";
 import Profile from "./src/screens/Profile/Proile";
+import SettingsScreen from "./src/screens/Profile/Settings";
 
 const Stack = createStackNavigator();
 
@@ -44,6 +45,14 @@ const UserStack = () => (
       component={() => (
         <MainLayout>
           <Profile />
+        </MainLayout>
+      )}
+      />
+      <Stack.Screen
+      name="Settings"
+      component={() => (
+        <MainLayout>
+          <SettingsScreen />
         </MainLayout>
       )}
       />

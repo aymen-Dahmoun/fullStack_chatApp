@@ -14,7 +14,7 @@ import { useAuth } from "../../context/authContext";
 import Message from "../../comps/Message";
 import { useSocket } from "../../hooks/useSocket";
 import { Icon } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useColorScheme } from "nativewind";
 
 export default function ChatScreen({ route }) {
   const conversationId = route?.params?.conversationId;
@@ -27,6 +27,7 @@ export default function ChatScreen({ route }) {
   const [newMessage, setNewMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const flatListRef = useRef(null);
+  const { colorScheme } = useColorScheme();
 
   useEffect(() => {
     if (!socket || !conversationId) return;
@@ -44,7 +45,7 @@ const handleIncomingMessage = (incoming) => {
     if (prev.some((msg) => msg.id === incoming.id)) return prev;
 
     if (isOwnMessage) {
-      // Replace the pending message
+
       return prev.map((msg) =>
         msg.tempId && msg.content === incoming.content
           ? { ...incoming, isPending: false }
@@ -52,7 +53,6 @@ const handleIncomingMessage = (incoming) => {
       );
     }
 
-    // Incoming from other user
     return [incoming, ...prev];
   });
 
@@ -60,21 +60,10 @@ const handleIncomingMessage = (incoming) => {
 };
 
 
-    const handleMessageSent = (sent) => {
-      console.log('sent: ', sent)
-      if (sent.conversationId !== conversationId) return;
-      setMessages((prev) =>
-        prev.map((msg) => (msg.tempId === sent.tempId ? sent : msg))
-      );
-      setIsSending(false);
-    };
-
     socket.on("chat message", handleIncomingMessage);
-    // socket.on("message sent", handleMessageSent);
 
     return () => {
       socket.off("chat message", handleIncomingMessage);
-      // socket.off("message sent", handleMessageSent);
     };
   }, [socket, conversationId]);
 
@@ -110,7 +99,7 @@ const handleIncomingMessage = (incoming) => {
   }
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-white dark:bg-gray-950">
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
@@ -146,27 +135,27 @@ const handleIncomingMessage = (incoming) => {
             />
         )}
 
-        <View className="flex-row items-center p-3 bg-white border-t pb-6 border-gray-200">
+        <View className="flex-row items-center p-3 bg-white border-t border-gray-200 dark:bg-gray-950 dark:border-neutral-700">
           <TextInput
             style={{
               borderWidth: 0.5,
               fontSize: 18,
+              color:'rgb(250,250,250)'
             }}
             className="flex-1 border-neutral-400 rounded-lg p-4 mr-5"
             placeholder="Type a message..."
-            placeholderTextColor="#9ca3af"
+            placeholderTextColor={colorScheme === 'dark' ? "#9ca3af" : "#edf1f7"}
             value={newMessage}
             onChangeText={setNewMessage}
             multiline
             textAlignVertical="center"
-            blurOnSubmit={false}
           />
 
           <TouchableOpacity
             onPress={handleSend}
             disabled={!newMessage.trim() || isSending}
             className={`px-5 py-3 rounded-full ${
-              newMessage.trim() && !isSending ? "bg-sky-700" : "bg-gray-300"
+              newMessage.trim() && !isSending ? "bg-sky-700 dark:bg-slate-700" : "bg-gray-300"
             }`}
             >
             {isSending ? (

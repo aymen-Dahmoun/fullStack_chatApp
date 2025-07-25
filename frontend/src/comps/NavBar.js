@@ -22,7 +22,7 @@ export default function NavBar() {
   ];
 
   return (
-    <View className="h-20 bg-sky-700 flex-row border-t border-white/20">
+    <View className="h-20 bg-sky-700 flex-row border-t border-white/20 dark:bg-slate-800">
       {tabs.map((tab) => {
         const isActive = currentRoute === tab.name;
 

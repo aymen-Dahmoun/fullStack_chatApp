@@ -16,6 +16,7 @@
     "expo-constants": "^17.1.7",
     "expo-secure-store": "^14.2.3",
     "expo-status-bar": "~2.2.3",
+    "lottie-react-native": "7.2.2",
     "nativewind": "^4.1.23",
     "prettier-plugin-tailwindcss": "^0.5.11",
     "react": "19.0.0",
@@ -27,15 +28,13 @@
     "react-native-screens": "^4.13.0",
     "react-native-svg": "^15.12.0",
     "react-native-vector-icons": "^10.2.0",
-    "react-native-webrtc": "^124.0.5",
     "socket.io-client": "^4.8.1",
-    "tailwindcss": "^3.4.17",
-    "lottie-react-native": "7.2.2"
+    "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
-    "typescript": "~5.8.3",
-    "@types/react": "~19.0.10"
+    "@types/react": "~19.0.10",
+    "typescript": "~5.8.3"
   },
   "private": true
 }

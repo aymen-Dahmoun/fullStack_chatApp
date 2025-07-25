@@ -24,14 +24,14 @@ export default function ChatElement({ item }) {
         <View className="flex-row justify-between items-center bg-transparent pr-4 pl-4 pb-6 m-2">
           <ProfileIcon username={username} />
           <View className="flex-1 pr-2">
-            <Text className="text-xl font-bold text-gray-900">
+            <Text className="text-xl font-bold text-gray-900 dark:text-gray-100">
               {username}
             </Text>
-            <Text className="text-lg text-gray-500" numberOfLines={1}>
+            <Text className="text-lg text-gray-500 dark:text-gray-300" numberOfLines={1}>
               {message}
             </Text>
           </View>
-          <Text className="text-lg text-gray-400">
+          <Text className="text-lg text-gray-400 dark:text-gray-300">
             {formatTime(time)}
           </Text>
         </View>
