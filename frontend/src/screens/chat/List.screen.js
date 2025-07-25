@@ -8,7 +8,7 @@ import bg_image from '../../../assets/wwwhirl.png'
 export default function ListScreen() {
   const { data, loading, error } = useConversation();
 
-  if (loading) return <ActivityIndicator size={80} className="mt-10 h-full" />;
+  if (loading) return <ActivityIndicator size={80} className="dark:bg-black h-screen" />;
   if (error)
     return (
       <Text className="text-red-500 text-center mt-4">
@@ -17,7 +17,7 @@ export default function ListScreen() {
     );
 
   return (
-    <View className="flex-1 bg-white px-2 pt-8 dark:bg-black">
+    <View className="flex-1 bg-white px-2 pt-20 dark:bg-black">
       <AuthBackground secondImage={bg_image} mainImage={bg_image} thirdImage={bg_image} />
       <FlatList
         data={data}

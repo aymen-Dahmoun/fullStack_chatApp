@@ -15,10 +15,13 @@ import Message from "../../comps/Message";
 import { useSocket } from "../../hooks/useSocket";
 import { Icon } from "react-native-paper";
 import { useColorScheme } from "nativewind";
+import ProfileIcon from "../../comps/ProfileIcon";
 
 export default function ChatScreen({ route }) {
   const conversationId = route?.params?.conversationId;
   const messengerId = route?.params?.messenger;
+  const messengerUsername = route?.params?.messenger?.username || "Unknown";
+
 
   const { data: messages, loading, setMessages } = useChat(conversationId);
   const { user } = useAuth();
@@ -99,79 +102,91 @@ const handleIncomingMessage = (incoming) => {
   }
 
   return (
-    <View className="flex-1 bg-white dark:bg-gray-950">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === "android" ? 120 : 120}
-      >
+<View className="flex-1 bg-white mt-6 dark:bg-gray-950">
+  <KeyboardAvoidingView
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+    style={{ flex: 1 }}
+    keyboardVerticalOffset={Platform.OS === "android" ? 20 : 0}
+  >
 
-        {loading && messages.length === 0 ? (
-          <View className="flex-1 items-center justify-center">
-            <ActivityIndicator size="large" color="#007aff" />
-          </View>
-        ) : (
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            keyExtractor={(item) => item.id?.toString() || item.tempId}
-            contentContainerStyle={{ padding: 12, flexGrow: 1 }}
-            inverted
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <Message
-              content={item.content}
-              senderName={item.sender?.username || "Unknown"}
-              isSignedUser={user.id === item.sender?.id}
-              timestamp={item.createdAt}
-              isPending={item.isPending}
-              />
-            )}
-            ListEmptyComponent={() => (
-              <View className="flex-1 items-center justify-center py-20">
-                <Text className="text-gray-500 text-lg">No messages yet</Text>
-              </View>
-            )}
-            />
-        )}
-
-        <View className="flex-row items-center p-3 bg-white border-t border-gray-200 dark:bg-gray-950 dark:border-neutral-700">
-          <TextInput
-            style={{
-              borderWidth: 0.5,
-              fontSize: 18,
-              color:'rgb(250,250,250)'
-            }}
-            className="flex-1 border-neutral-400 rounded-lg p-4 mr-5"
-            placeholder="Type a message..."
-            placeholderTextColor={colorScheme === 'dark' ? "#9ca3af" : "#edf1f7"}
-            value={newMessage}
-            onChangeText={setNewMessage}
-            multiline
-            textAlignVertical="center"
-          />
-
-          <TouchableOpacity
-            onPress={handleSend}
-            disabled={!newMessage.trim() || isSending}
-            className={`px-5 py-3 rounded-full ${
-              newMessage.trim() && !isSending ? "bg-sky-700 dark:bg-slate-700" : "bg-gray-300"
-            }`}
-            >
-            {isSending ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <Text
-              className={`font-medium ${
-                newMessage.trim() ? "text-white" : "text-gray-500"
-              }`}
-              >
-                Send
-              </Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
+    <View className="flex-row items-center gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
+      <ProfileIcon username={messengerUsername} size={40} />
+      <View>
+        <Text className="text-base font-semibold text-gray-800 dark:text-gray-100">
+          {messengerUsername}
+        </Text>
+      </View>
     </View>
+
+    {loading && messages.length === 0 ? (
+      <View className="flex-1 items-center justify-center bg-inherit">
+        <ActivityIndicator size="large" color="#007aff" className='bg-inherit' />
+      </View>
+    ) : (
+      <FlatList
+        ref={flatListRef}
+        data={messages}
+        keyExtractor={(item) => item.id?.toString() || item.tempId}
+        contentContainerStyle={{ padding: 12, flexGrow: 1 }}
+        inverted
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => (
+          <Message
+            content={item.content}
+            senderName={item.sender?.username || "Unknown"}
+            isSignedUser={user.id === item.sender?.id}
+            timestamp={item.createdAt}
+            isPending={item.isPending}
+          />
+        )}
+        ListEmptyComponent={() => (
+          <View className="flex-1 items-center justify-center py-20">
+            <Text className="text-gray-500 text-lg">No messages yet</Text>
+          </View>
+        )}
+      />
+    )}
+
+    {/* MESSAGE INPUT */}
+    <View className="flex-row items-center p-3 bg-white border-t border-gray-200 dark:bg-gray-950 dark:border-neutral-700">
+      <TextInput
+        style={{
+          borderWidth: 0.5,
+          fontSize: 18,
+          color: "rgb(250,250,250)",
+        }}
+        className="flex-1 border-neutral-400 rounded-lg p-4 mr-5"
+        placeholder="Type a message..."
+        placeholderTextColor={colorScheme === "dark" ? "#9ca3af" : "#edf1f7"}
+        value={newMessage}
+        onChangeText={setNewMessage}
+        multiline
+        textAlignVertical="center"
+      />
+
+      <TouchableOpacity
+        onPress={handleSend}
+        disabled={!newMessage.trim() || isSending}
+        className={`px-5 py-3 rounded-full ${
+          newMessage.trim() && !isSending
+            ? "bg-sky-700 dark:bg-slate-700"
+            : "bg-gray-300"
+        }`}
+      >
+        {isSending ? (
+          <ActivityIndicator size="small" color="white" />
+        ) : (
+          <Text
+            className={`font-medium ${
+              newMessage.trim() ? "text-white" : "text-gray-500"
+            }`}
+          >
+            Send
+          </Text>
+        )}
+      </TouchableOpacity>
+    </View>
+  </KeyboardAvoidingView>
+</View>
   );
 }

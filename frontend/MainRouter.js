@@ -13,18 +13,23 @@ import MainLayout from "./src/comps/MainLayout";
 import ChatScreen from "./src/screens/chat/Chat.screen";
 import Profile from "./src/screens/Profile/Proile";
 import SettingsScreen from "./src/screens/Profile/Settings";
+import { MyDarkTheme } from "./src/constants/topBarTheme";
 
 const Stack = createStackNavigator();
 
 const AuthStack = () => (
-  <Stack.Navigator initialRouteName="Login">
+  <Stack.Navigator initialRouteName="Login" screenOptions={{
+    headerShown: false
+  }} >
     <Stack.Screen name="Login" component={LoginScreen} />
     <Stack.Screen name="Register" component={RegisterScreen} />
   </Stack.Navigator>
 );
 
 const UserStack = () => (
-  <Stack.Navigator initialRouteName="Messages">
+  <Stack.Navigator initialRouteName="Messages" screenOptions={{
+    headerShown: false
+  }} >
     <Stack.Screen name="Messages" component={
       ()=>(
         <MainLayout>
@@ -62,7 +67,7 @@ const UserStack = () => (
 export default function MainRouter() {
   const { user, loading } = useAuth();
 
-  if (loading) return <ActivityIndicator size={'large'}></ActivityIndicator>; // or a loading spinner
+  if (loading) return <ActivityIndicator size={'large'}></ActivityIndicator>;
 
   return (
     <NavigationContainer>

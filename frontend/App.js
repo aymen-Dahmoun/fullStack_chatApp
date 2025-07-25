@@ -10,7 +10,9 @@ export default function App() {
     
     <SafeAreaProvider>
       <AuthProvider >
+        <View className='flex-1 bg-white dark:bg-black' >
           <MainRouter />
+        </View>
       </AuthProvider>
     </SafeAreaProvider>
   );

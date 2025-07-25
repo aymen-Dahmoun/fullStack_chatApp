@@ -16,14 +16,13 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const navigation = useNavigation();
   const { setUser } = useAuth();
-  const { colorScheme, toggleColorScheme } = useColorScheme();
+  const { colorScheme } = useColorScheme();
 
   const handleLogin = async () => {
     try {
       const data = await loginWithCredentials({
-        email: usernameOrEmail,
+        usernameOrEmail,
         password,
-        username: usernameOrEmail
       });
       setUser(data.user);
     } catch (error) {
