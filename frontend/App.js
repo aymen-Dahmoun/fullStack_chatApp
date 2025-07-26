@@ -4,15 +4,18 @@ import './global.css';
 import MainRouter from './MainRouter';
 import { AuthProvider } from './src/context/authContext';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { PaperProvider } from 'react-native-paper';
 
 export default function App() {
   return (
     
     <SafeAreaProvider>
       <AuthProvider >
-        <View className='flex-1 bg-white dark:bg-black' >
-          <MainRouter />
-        </View>
+        <PaperProvider>  
+          <View className='flex-1 bg-white dark:bg-black' >
+            <MainRouter />
+          </View>
+        </PaperProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );

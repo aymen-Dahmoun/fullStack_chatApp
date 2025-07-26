@@ -8,8 +8,18 @@ export default function useChat(conversationId) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+
   useEffect(() => {
     const getConversations = async () => {
+      if (!conversationId){
+        return {
+          data,
+          loading,
+          error,
+          setMessages: setData
+        };
+      }
+
       try {
         const response = await api.get(`/api/conversation/chat/${conversationId}`);
         // console.log("convs from useChat: ", response.data);
