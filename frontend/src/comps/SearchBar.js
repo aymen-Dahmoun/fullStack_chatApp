@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { View, TextInput, Text, TouchableOpacity, FlatList, Dimensions, ScrollView } from "react-native";
 import useSearch from "../hooks/useSearch";
+import { useNavigation } from "@react-navigation/native";
 
-const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 export default function SearchBar() {
   const [query, setQuery] = useState('');
   const [visible, setVisible] = useState(false);
   const { data: results, loading, error } = useSearch(query);
+  const navigation = useNavigation();
 
   const toggleVisibility = (text) => {
     setQuery(text);
@@ -41,9 +42,9 @@ export default function SearchBar() {
             renderItem={({ item }) => (
               <TouchableOpacity
                 onPress={() => {
-                  console.log('User selected:', item);
                   setQuery('');
                   setVisible(false);
+                  navigation.navigate('Chat', { messenger: item })
                 }}
               >
                 <View className="p-3 border-b border-gray-200 dark:border-gray-700">

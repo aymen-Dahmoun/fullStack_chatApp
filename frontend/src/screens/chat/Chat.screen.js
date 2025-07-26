@@ -16,11 +16,13 @@ import { useSocket } from "../../hooks/useSocket";
 import { Icon } from "react-native-paper";
 import { useColorScheme } from "nativewind";
 import ProfileIcon from "../../comps/ProfileIcon";
+import { createConversation } from "../../utils/createConversation.utils";
 
 export default function ChatScreen({ route }) {
-  const conversationId = route?.params?.conversationId;
-  const messengerId = route?.params?.messenger;
+  const conversationId = route?.params?.conversationId || '';
+  const messenger = route?.params?.messenger;
   const messengerUsername = route?.params?.messenger?.username || "Unknown";
+  const setConversation = route?.params?.messenger?.setConversation
 
 
   const { data: messages, loading, setMessages } = useChat(conversationId);
@@ -31,6 +33,7 @@ export default function ChatScreen({ route }) {
   const [isSending, setIsSending] = useState(false);
   const flatListRef = useRef(null);
   const { colorScheme } = useColorScheme();
+  const [newConversation, setNewConversation] = useState(conversationId === '')
 
   useEffect(() => {
     if (!socket || !conversationId) return;
@@ -70,29 +73,51 @@ const handleIncomingMessage = (incoming) => {
     };
   }, [socket, conversationId]);
 
-  const handleSend = useCallback(() => {
-    const content = newMessage.trim();
-    if (!socket || !content || isSending) return;
+const handleSend = useCallback(async () => {
+  const content = newMessage.trim();
+  if (!socket || !content || isSending) return;
 
-    const tempId = `${Date.now()}-${Math.random()}`;
-    const tempMessage = {
-      content,
-      conversationId,
-      receiverId: messengerId,
-      sender: { id: user.id, username: user.username },
-      createdAt: new Date().toISOString(),
-      tempId,
-      isPending: true,
-    };
+  setIsSending(true);
 
-    setMessages((prev) => [tempMessage, ...prev]);
-    setNewMessage("");
-    setIsSending(true);
+  let finalConversationId = conversationId;
 
-    socket.emit("chat message", { content, conversationId, receiverId: messengerId });
-  }, [socket, conversationId, messengerId, newMessage, isSending]);
+  if (!conversationId || messages.length === 0) {
+    try {
+      const response = await createConversation({ userId: user.id, messengerId: messenger.id });
+      finalConversationId = response.conversation.id;
+      route.params.conversationId = finalConversationId;
+    } catch (err) {
+      console.error("Failed to create conversation:", err);
+      setIsSending(false);
+      return;
+    }
+  }
 
-  if (!conversationId || !user?.id) {
+  const tempId = `${Date.now()}-${Math.random()}`;
+  const tempMessage = {
+    content,
+    conversationId: finalConversationId,
+    receiverId: messenger.id,
+    sender: { id: user.id, username: user.username },
+    createdAt: new Date().toISOString(),
+    tempId,
+    isPending: true,
+  };
+
+  setMessages((prev) => [tempMessage, ...prev]);
+  setNewMessage("");
+  if(!newConversation) {
+    setNewConversation(false);
+  }
+
+  socket.emit("chat message", {
+    content,
+    conversationId: finalConversationId,
+    receiverId: messenger.id,
+  });
+}, [socket, conversationId, messenger, newMessage, isSending, messages]);
+
+  if (!user?.id) {
     return (
       <View className="flex-1 items-center justify-center">
         <Icon source="alert-circle" color="#dc2626" size={60} />
@@ -118,7 +143,7 @@ const handleIncomingMessage = (incoming) => {
       </View>
     </View>
 
-    {loading && messages.length === 0 ? (
+    {loading && messages.length === 0 && !newConversation ? (
       <View className="flex-1 items-center justify-center bg-inherit">
         <ActivityIndicator size="large" color="#007aff" className='bg-inherit' />
       </View>
@@ -128,7 +153,7 @@ const handleIncomingMessage = (incoming) => {
         data={messages}
         keyExtractor={(item) => item.id?.toString() || item.tempId}
         contentContainerStyle={{ padding: 12, flexGrow: 1 }}
-        inverted
+        inverted={!newConversation}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <Message

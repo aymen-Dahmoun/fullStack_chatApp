@@ -1,3 +1,4 @@
+import Conversation from "../models/conversation.js";
 import { sequelize } from "../models/index.js";
 import { Op } from "sequelize";
 
@@ -66,5 +67,42 @@ export const getConversations = async (req, res) => {
   } catch (error) {
     console.error("Error fetching conversations:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+export const createConversation = async (req, res) => {
+  try {
+    const { userId, messengerId } = req.body;
+
+    if (!userId || !messengerId) {
+      return res.status(400).json({ error: 'userId and messengerId are required' });
+    }
+
+    const existingConversation = await Conversation.findOne({
+      where: {
+        userId,
+        messengerId,
+      },
+    });
+
+    if (existingConversation) {
+      return res.status(200).json({
+        message: 'Conversation already exists',
+        conversation: existingConversation,
+      });
+    }
+
+    const conversation = await Conversation.create({
+      userId,
+      messengerId,
+    });
+
+    return res.status(201).json({
+      message: 'Conversation created successfully',
+      conversation,
+    });
+  } catch (error) {
+    console.error('Error creating conversation:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };

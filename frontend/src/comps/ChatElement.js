@@ -4,7 +4,7 @@ import { Divider } from "react-native-paper";
 import ProfileIcon from "./ProfileIcon";
 
 
-export default function ChatElement({ item }) {
+export default function ChatElement({ item, setConversation }) {
     
     const navigation = useNavigation();
 
@@ -19,7 +19,7 @@ export default function ChatElement({ item }) {
 
     return (
       <TouchableOpacity 
-        onPress={()=>navigation.navigate('Chat', {conversationId: item.conversationId, messenger: item.messenger})}
+        onPress={()=>navigation.navigate('Chat', {conversationId: item.conversationId, messenger: item.messenger, setConversation:setConversation})}
       >
         <View className="flex-row justify-between items-center bg-transparent pr-4 pl-4 pb-6 m-2">
           <ProfileIcon username={username} />
