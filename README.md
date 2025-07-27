@@ -1,159 +1,173 @@
-# Full-Stack Chat Application
-[![Ask DeepWiki](https://devin.ai/assets/askdeepwiki.png)](https://deepwiki.com/aymen-Dahmoun/fullStack_chatApp)
+# 🗨️ Full-Stack Chat Application
 
-This is a comprehensive, real-time chat application built with a modern stack. It features a React Native frontend for a cross-platform mobile experience and a robust Node.js backend. The application supports user authentication, private conversations, and instant messaging powered by WebSockets.
+*A cross-platform real-time chat app using React Native & Node.js*
 
-## Features
-
--   **Real-time Messaging**: Leverages Socket.IO for instant, bidirectional communication between users.
--   **User Authentication**: Secure user registration and login system using JSON Web Tokens (JWT).
--   **Persistent Conversations**: All conversations and messages are stored in a PostgreSQL database using the Sequelize ORM.
--   **One-on-One Chat**: Users can engage in private, one-on-one conversations.
--   **Cross-Platform Frontend**: Built with React Native and Expo, enabling deployment on both iOS and Android.
--   **Modern UI**: Styled with NativeWind, bringing the power and convenience of Tailwind CSS to React Native.
--   **Intuitive Navigation**: Smooth screen transitions managed by React Navigation.
-
-## Tech Stack
-
-**Backend:**
-- Node.js
-- Express.js
-- PostgreSQL
-- Sequelize
-- Socket.IO
-- JSON Web Token (JWT)
-- Bcryptjs
-
-**Frontend:**
-- React Native
-- Expo
-- NativeWind (for Tailwind CSS)
-- React Navigation
-- Socket.IO Client
-- Axios
-- React Native Paper
-
-## Project Structure
-
-The repository is organized into a monorepo structure with two main directories:
-
--   `backend/`: Contains the Node.js/Express server, API routes, database models, and WebSocket logic.
--   `frontend/`: Contains the React Native (Expo) mobile application, including screens, components, and hooks.
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=react,nodedotjs,express,postgres,sequelize,jwt,bcryptjs,expo,tailwindcss,typescript&perline=6" />
+</p>
 
 ---
 
-## Getting Started
+## ✨ Features
 
-Follow these instructions to set up and run the project on your local machine.
+* 🔐 **User Authentication** with JWT + bcryptjs
+* ⚡ **Real-Time Messaging** using Socket.IO
+* 💬 **Private Chats** (1-on-1 conversations)
+* 💾 **Persistent Data** stored in PostgreSQL via Sequelize
+* 📱 **Cross-Platform Frontend** (iOS + Android)
+* 🎨 **Tailwind CSS UI** using NativeWind
+* 🧭 **Smooth Navigation** with React Navigation
 
-### Prerequisites
+---
 
--   Node.js (v18 or higher recommended)
--   npm (or yarn)
--   A running PostgreSQL instance
+## 🧱 Tech Stack
 
-### 1. Clone the Repository
+### 🔧 Backend
 
-```bash
-git clone https://github.com/aymen-dahmoun/fullstack_chatapp.git
-cd fullstack_chatapp
+* Node.js, Express.js
+* PostgreSQL + Sequelize
+* Socket.IO
+* JWT + bcryptjs
+
+### 📱 Frontend
+
+* React Native (Expo)
+* NativeWind (Tailwind CSS for RN)
+* React Navigation
+* Axios + Socket.IO Client
+* React Native Paper
+
+---
+
+## 🗂️ Project Structure
+
+```
+fullstack_chatapp/
+│
+├── backend/         # Node.js + Express API
+│   ├── models/      # Sequelize models
+│   ├── routes/      # API endpoints
+│   ├── socket/      # WebSocket logic
+│   └── .env
+│
+└── frontend/        # React Native app (Expo)
+    ├── screens/     # Auth + Chat UI
+    ├── components/  # UI elements
+    └── app.json     # API link config
 ```
 
-### 2. Backend Setup
+---
 
-1.  Navigate to the backend directory:
-    ```bash
-    cd backend
-    ```
+## 🚀 Getting Started
 
-2.  Install the dependencies:
-    ```bash
-    npm install
-    ```
+### 🔌 Backend Setup
 
-3.  Create a `.env` file in the `backend` root directory. This file will store your environment variables. Add the following, replacing the placeholder values with your PostgreSQL credentials:
-    ```env
-    DB_NAME=your_db_name
-    DB_USER=your_db_user
-    DB_PASSWORD=your_db_password
-    DB_HOST=localhost
-    DB_PORT=5432
-    IP_ADDRESS_LINK="http://<YOUR_LOCAL_IP>:3000" # Frontend URL for CORS
-    JWT_SECRET=your_super_secret_jwt_key
-    ```
+```bash
+cd backend
+npm install
+```
 
-4.  Start the backend server:
-    ```bash
-    npm run dev
-    ```
-    The server will start on `http://localhost:5000`.
+Create a `.env` file in the `backend` directory:
 
-### 3. Frontend Setup
+```env
+DB_NAME=your_db_name
+DB_USER=your_db_user
+DB_PASSWORD=your_db_password
+DB_HOST=localhost
+DB_PORT=5432
+JWT_SECRET=your_jwt_secret
+IP_ADDRESS_LINK="http://<YOUR_LOCAL_IP>:3000"
+```
 
-1.  Navigate to the frontend directory:
-    ```bash
-    cd ../frontend
-    ```
+Start the server:
 
-2.  Install the dependencies:
-    ```bash
-    npm install
-    ```
+```bash
+npm run dev
+```
 
-3.  The frontend needs to know the address of the backend server. Create or modify the `app.json` file in the `frontend` root to include your backend server address under the `extra` key.
-    
-    *Replace `<YOUR_LOCAL_IP>` with your machine's local IP address so your mobile device can reach the server.*
+The backend will run at `http://localhost:5000`.
 
-    ```json
-    {
-      "expo": {
-        "name": "frontend",
-        "slug": "frontend",
-        "version": "1.0.0",
-        "extra": {
-          "API_LINK": "http://<YOUR_LOCAL_IP>:5000"
-        }
-      }
+---
+
+### 📱 Frontend Setup
+
+```bash
+cd ../frontend
+npm install
+```
+
+Edit `app.json` to point to your backend:
+
+```json
+{
+  "expo": {
+    "extra": {
+      "API_LINK": "http://<YOUR_LOCAL_IP>:5000"
     }
-    ```
+  }
+}
+```
 
-4.  Start the Expo development server:
-    ```bash
-    npx expo start
-    ```
-5.  Scan the QR code with the Expo Go app on your iOS or Android device to run the application.
+Start Expo:
 
-## API Endpoints
+```bash
+npx expo start
+```
 
-The backend exposes the following RESTful endpoints:
+Scan the QR code with the Expo Go app on your device to run the application.
 
--   **Authentication**
-    -   `POST /api/auth/register`: Register a new user.
-    -   `POST /api/auth/login`: Log in a user and receive a JWT.
-    -   `GET /api/session`: Get the current user's session data using a valid JWT.
--   **Conversations**
-    -   `GET /api/conversation/:userId`: Fetch all conversations for a specific user.
-    -   `GET /api/conversation/chat/:conversationId`: Fetch all messages within a specific conversation.
+---
 
-## Socket Events
+## 📡 API Endpoints
 
-The application uses Socket.IO for real-time communication.
+### 🔐 Authentication
 
--   **`connection`**: A user connects to the socket server upon successful authentication.
--   **`chat message`**: Sent from a client to the server with message data (`content`, `conversationId`, `receiverId`). The server then broadcasts this message to the appropriate recipient.
--   **`disconnect`**: A user disconnects from the server.
+* `POST /api/auth/register`
+* `POST /api/auth/login`
+* `GET /api/session`
 
-🔮 Future Plans
-We aim to expand the capabilities of this chat application beyond text-based communication. Planned features include:
+### 💬 Conversations
 
-Voice and Video Calling:
-Integration of WebRTC to enable peer-to-peer voice and video calls for a more immersive communication experience.
+* `GET /api/conversation/:userId`
+* `GET /api/conversation/chat/:conversationId`
 
-File Sharing:
-Support for sending and receiving:
+---
 
-Images
+## 🔌 Socket Events
 
-Videos
+| Event          | Description                                                                                        |
+| -------------- | -------------------------------------------------------------------------------------------------- |
+| `connection`   | User connects to the socket server                                                                 |
+| `chat message` | Client sends a message (`content`, `conversationId`, `receiverId`); server broadcasts to recipient |
+| `disconnect`   | User disconnects from the socket                                                                   |
 
-Documents (PDF, DOCX, etc.)
+---
+
+## 🔮 Future Plans
+
+* 📞 **Voice & Video Calling** (WebRTC)
+* 📁 **File Sharing** (images, PDFs, documents)
+* 📸 **Screenshot Sharing**
+
+---
+
+## 🖼️ Screenshots
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/05b5eb97-b1af-4446-b548-12a686531e68" width="200" />
+  <img src="https://github.com/user-attachments/assets/92274f94-87ba-4f73-bbad-4047551fbf70" width="200" />
+  <img src="https://github.com/user-attachments/assets/a39e8917-8a9c-413b-b33d-cd41ce8a3dca" width="200" />
+  <img src="https://github.com/user-attachments/assets/933ca7b9-811d-4fe8-86b7-dfd8d46b82c5" width="200" />
+  <br/>
+  <img src="https://github.com/user-attachments/assets/314b5e56-0a42-4da7-8853-5abbdcb022fd" width="200" />
+  <img src="https://github.com/user-attachments/assets/c67ae03d-e37c-4735-98af-2f9c46bd412f" width="200" />
+  <img src="https://github.com/user-attachments/assets/afceda71-b466-4465-9582-74c6ec2fc941" width="200" />
+  <img src="https://github.com/user-attachments/assets/51b208d4-0972-45b1-8c5b-736b1f9d0f40" width="200" />
+</p>
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please open an issue or submit a pull request.
+
