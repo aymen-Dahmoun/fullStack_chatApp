@@ -3,7 +3,7 @@
 *A cross-platform real-time chat app using React Native & Node.js*
 
 <p align="center">
-  <img src="https://skillicons.dev/icons?i=react,nodedotjs,express,postgres,sequelize,jwt,bcryptjs,expo,tailwindcss,typescript&perline=6" />
+  <img src="https://skillicons.dev/icons?i=react,nodejs,express,postgres,sequelize,jwt,bcryptjs,expo,tailwindcss,typescript&perline=6" />
 </p>
 
 ---
