@@ -11,7 +11,7 @@ const onlineUsers = new Map();
 export const initSocket = (server) => {
     const io = new Server(server, {
         cors: {
-            origin: process.env.IP_ADDRESS_LINK,
+            origin: 'https://fullstack-chatapp-71vx.onrender.com', // process.env.IP_ADDRESS_LINK,
             methods: ['GET', 'POST'],
         },
     });
