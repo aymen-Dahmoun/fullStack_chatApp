@@ -9,10 +9,11 @@ const JWT_EXPIRES_IN = "7d";
 export const register = async (req, res) => {
     try {
         const { username, password, email } = req.body;
-        email = email.toLowerCase();
-        email = email.trim();
+        let emailLowerTrim = emailLowerTrim.toLowerCase();
+        emailLowerTrim = emailLowerTrim.trim();
+        
         username = username.trim();
-        if (!username || !password || !email) {
+        if (!username || !password || !emailLowerTrim) {
             return res.status(400).json({ error: "Username, password, and email are required" });
         }
 
@@ -21,7 +22,7 @@ export const register = async (req, res) => {
             return res.status(400).json({ error: "Username already exists" });
         }
 
-        const existingEmail = await User.findOne({ where: { email } });
+        const existingEmail = await User.findOne({ where: { email: emailLowerTrim } });
         if (existingEmail) {
             return res.status(400).json({ error: "Email already in use" });
         }
@@ -30,7 +31,7 @@ export const register = async (req, res) => {
 
         const newUser = await User.create({
             username,
-            email,
+            email: emailLowerTrim,
             password: hashedPassword
         });
 
@@ -55,21 +56,21 @@ export const login = async (req, res) => {
   try {
     console.log(req.body)
     const { usernameOrEmail, password } = req.body;
-    usernameOrEmail = usernameOrEmail.trim();
+    const usernameOrEmailTrimed = usernameOrEmail.trim();
 
-    if (!usernameOrEmail || !password) {
+    if (!usernameOrEmailTrimed || !password) {
       return res
         .status(400)
         .json({ error: "Username/email and password are required" });
     }
 
     // Simple regex to test if it's an email
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(usernameOrEmail);
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(usernameOrEmailTrimed);
 
     const user = await User.findOne({
       where: isEmail
-        ? { email: usernameOrEmail.toLowerCase() }
-        : { username: usernameOrEmail },
+        ? { email: usernameOrEmailTrimed.toLowerCase() }
+        : { username: usernameOrEmailTrimed },
     });
 
     if (!user) {
