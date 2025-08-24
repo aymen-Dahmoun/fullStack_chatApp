@@ -40,7 +40,7 @@ useEffect(() => {
         return;
       }
 
-      const newSocket = io(Constants.expoConfig.extra.API_LINK, {
+      const newSocket = io('https://fullstack-chatapp-71vx.onrender.com', {
         auth: { token },
         transports: ['websocket'], // Force WebSocket transport
         timeout: 20000, // Increase timeout

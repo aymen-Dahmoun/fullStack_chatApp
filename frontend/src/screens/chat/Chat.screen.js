@@ -127,11 +127,11 @@ const handleSend = useCallback(async () => {
   }
 
   return (
-<View className="flex-1 bg-white mt-6 dark:bg-gray-950">
+<View className="flex-1 bg-white pt-12 dark:bg-gray-950">
   <KeyboardAvoidingView
     behavior={Platform.OS === "ios" ? "padding" : "height"}
     style={{ flex: 1 }}
-    keyboardVerticalOffset={Platform.OS === "android" ? 20 : 0}
+    keyboardVerticalOffset={Platform.OS === "android" ? 80 : 0}
   >
 
     <View className="flex-row items-center gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">

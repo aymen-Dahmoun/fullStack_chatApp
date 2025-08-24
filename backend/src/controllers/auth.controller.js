@@ -9,7 +9,9 @@ const JWT_EXPIRES_IN = "7d";
 export const register = async (req, res) => {
     try {
         const { username, password, email } = req.body;
-
+        email = email.toLowerCase();
+        email = email.trim();
+        username = username.trim();
         if (!username || !password || !email) {
             return res.status(400).json({ error: "Username, password, and email are required" });
         }
@@ -53,6 +55,7 @@ export const login = async (req, res) => {
   try {
     console.log(req.body)
     const { usernameOrEmail, password } = req.body;
+    usernameOrEmail = usernameOrEmail.trim();
 
     if (!usernameOrEmail || !password) {
       return res
