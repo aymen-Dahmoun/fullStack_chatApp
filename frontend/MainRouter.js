@@ -14,6 +14,7 @@ import ChatScreen from "./src/screens/chat/Chat.screen";
 import Profile from "./src/screens/Profile/Proile";
 import SettingsScreen from "./src/screens/Profile/Settings";
 import { MyDarkTheme } from "./src/constants/topBarTheme";
+import CallScreen from "./src/screens/chat/Call.screen";
 
 const Stack = createStackNavigator();
 
@@ -61,6 +62,15 @@ const UserStack = () => (
         </MainLayout>
       )}
       />
+      <Stack.Screen
+      name="CallScreen"
+      component={() => (
+        <MainLayout>
+          <CallScreen />
+        </MainLayout>
+      )}
+      />
+      
   </Stack.Navigator>
 );
 

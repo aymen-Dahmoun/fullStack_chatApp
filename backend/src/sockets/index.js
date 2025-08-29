@@ -24,45 +24,104 @@ export const initSocket = (server) => {
 
         console.log(`User connected: ${socket.id}, user: ${socket.user.username}`);
 
-    socket.on('chat message', async (data) => {
-    try {
-        const { content, conversationId, receiverId, tempId } = data;
+        socket.on('chat message', async (data) => {
+        try {
+            const { content, conversationId, receiverId, tempId } = data;
 
 
-        if (!content || typeof content !== 'string') {
-        throw new Error('Invalid message content');
+            if (!content || typeof content !== 'string') {
+            throw new Error('Invalid message content');
+            }
+
+            const savedMessage = await saveMessage({
+            senderId: userId,
+            conversationId,
+            content,
+            });
+            const messagePayload = {
+                id: savedMessage.id,
+                content: savedMessage.content,
+                conversationId,
+                createdAt: savedMessage.createdAt,
+                tempId,
+                sender: {
+                    id: userId,
+                    username: socket.user.username,
+                },
+            };
+
+            socket.emit('chat message', messagePayload);
+
+        const receiverSocketId = onlineUsers.get(receiverId);
+
+        if (receiverSocketId) {
+        io.to(receiverSocketId).emit('chat message', messagePayload)
         }
 
-        const savedMessage = await saveMessage({
-        senderId: userId,
-        conversationId,
-        content,
+        } catch (error) {
+        console.error('Error handling chat message:', error);
+        socket.emit('error', { message: error.message });
+        }
         });
-        const messagePayload = {
-            id: savedMessage.id,
-            content: savedMessage.content,
-            conversationId,
-            createdAt: savedMessage.createdAt,
-            tempId,
-            sender: {
-                id: userId,
-                username: socket.user.username,
-            },
-        };
+        socket.on('call user', (data) => {
+            const { receiverId, signalData, from, name } = data;
+            const receiverSocketId = onlineUsers.get(receiverId);
 
-        socket.emit('chat message', messagePayload);
+            if (receiverSocketId) {
+                io.to(receiverSocketId).emit('incoming call', {
+                signal: signalData, // offer (SDP)
+                from,
+                name,
+                });
+            }
+            });
 
-    const receiverSocketId = onlineUsers.get(receiverId);
+            socket.on('answer call', (data) => {
+            const { to, signalData } = data; // to = callerId
+            const callerSocketId = onlineUsers.get(to);
 
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit('chat message', messagePayload)
-    }
+            if (callerSocketId) {
+                io.to(callerSocketId).emit('call accepted', {
+                signal: signalData, // (SDP)
+                from: socket.user.id,
+                });
+            }
+            });
 
-    } catch (error) {
-    console.error('Error handling chat message:', error);
-    socket.emit('error', { message: error.message });
-    }
-    });
+            socket.on('refuse call', (data) => {
+            const { to } = data;
+            const callerSocketId = onlineUsers.get(to);
+
+            if (callerSocketId) {
+                io.to(callerSocketId).emit('call refused', {
+                from: socket.user.id,
+                });
+            }
+            });
+
+            socket.on('end call', (data) => {
+            const { to } = data;
+            const peerSocketId = onlineUsers.get(to);
+
+            if (peerSocketId) {
+                io.to(peerSocketId).emit('call ended', {
+                from: socket.user.id,
+                });
+            }
+            });
+            socket.on('ice-candidate', (data) => {
+                const { to, candidate } = data;
+                const peerSocketId = onlineUsers.get(to);
+
+                if (peerSocketId) {
+                    io.to(peerSocketId).emit('ice-candidate', {
+                    from: socket.user.id,
+                    candidate,
+                    });
+                }
+            });
+
+
 
         socket.on('disconnect', () => {
             onlineUsers.delete(socket.user.id);
