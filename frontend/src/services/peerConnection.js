@@ -10,7 +10,10 @@ export function createPeerConnection({
   onIceCandidate,
   onConnectionStateChange,
 } = {}) {
-  const pc = new RTCPeerConnection({ iceServers });
+  const pc = new RTCPeerConnection({
+    iceServers,
+    iceCandidatePoolSize: 10,
+  });
 
   pc.ontrack = (event) => {
     if (typeof onTrack === "function") onTrack(event);
@@ -42,12 +45,18 @@ export function createPeerConnection({
       }
     },
     async createOffer() {
-      const offer = await pc.createOffer();
+      const offer = await pc.createOffer({
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true,
+      });
       await pc.setLocalDescription(offer);
       return offer;
     },
     async createAnswer() {
-      const answer = await pc.createAnswer();
+      const answer = await pc.createAnswer({
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true,
+      });
       await pc.setLocalDescription(answer);
       return answer;
     },
@@ -56,9 +65,12 @@ export function createPeerConnection({
     },
     async addIceCandidate(candidate) {
       try {
+        if (!pc.remoteDescription) {
+          throw new Error("Remote description is null");
+        }
         await pc.addIceCandidate(new RTCIceCandidate(candidate));
       } catch (err) {
-        console.warn("addIceCandidate failed:", err?.message || err);
+        throw err;
       }
     },
     close() {
@@ -66,8 +78,12 @@ export function createPeerConnection({
         pc.ontrack = null;
         pc.onicecandidate = null;
         pc.onconnectionstatechange = null;
+        pc.oniceconnectionstatechange = null;
+        pc.onicegatheringstatechange = null;
         pc.close();
-      } catch (e) {}
+      } catch (e) {
+        console.error("Error closing peer connection:", e);
+      }
     },
   };
 }

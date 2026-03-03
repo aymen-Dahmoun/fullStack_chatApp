@@ -13,11 +13,11 @@ import useChat from "../../hooks/useChat";
 import { useAuth } from "../../context/authContext";
 import Message from "../../comps/Message";
 import { useSocket } from "../../hooks/useSocket";
-import { Icon } from "react-native-paper";
 import { useColorScheme } from "nativewind";
 import ProfileIcon from "../../comps/ProfileIcon";
 import { createConversation } from "../../utils/createConversation.utils";
 import { useIsFocused } from "@react-navigation/native";
+import { FontAwesome } from "@expo/vector-icons";
 
 export default function ChatScreen({ route, navigation }) {
   const conversationId = route?.params?.conversationId || "";
@@ -139,7 +139,7 @@ export default function ChatScreen({ route, navigation }) {
   if (!user?.id) {
     return (
       <View className="flex-1 items-center justify-center">
-        <Icon source="alert-circle" color="#dc2626" size={60} />
+        <FontAwesome name="circle-exclamation" color="#dc2626" size={60} />
         <Text className="text-red-500 text-lg mt-2">
           Failed to load conversation
         </Text>
@@ -163,20 +163,25 @@ export default function ChatScreen({ route, navigation }) {
           </View>
           <TouchableOpacity
             onPress={() => {
-              if (!messenger?.id) {
-                console.warn("Missing messenger id for call", { messenger });
-                return;
-              }
-              console.log("Starting call to:", messenger.id);
+              if (!messenger?.id) return;
+
               navigation.navigate("Call", {
                 peerId: messenger.id,
                 peerName: messengerUsername,
                 isCaller: true,
               });
             }}
-            className="p-2"
+            className={`p-3 m-2 rounded-full border-2 ${
+              colorScheme === "dark"
+                ? "border-blue-200 bg-blue-200/10"
+                : "border-blue-300 bg-blue-300/10"
+            }`}
           >
-            <Icon source="phone" color="#16a34a" size={22} />
+            <FontAwesome
+              name="phone"
+              size={22}
+              color={colorScheme === "dark" ? "#bfdbfe" : "#93c5fd"}
+            />
           </TouchableOpacity>
         </View>
 
@@ -218,23 +223,22 @@ export default function ChatScreen({ route, navigation }) {
             style={{
               borderWidth: 0.5,
               fontSize: 18,
-              color: "rgb(250,250,250)",
+              color: `${colorScheme === "dark" ? "#edebeb" : "#050505"}`,
             }}
             className="flex-1 border-neutral-400 rounded-lg p-4 mr-5"
             placeholder="Type a message..."
             placeholderTextColor={
-              colorScheme === "dark" ? "#9ca3af" : "#edf1f7"
+              colorScheme === "dark" ? "#9ca3af" : "#999999"
             }
             value={newMessage}
             onChangeText={setNewMessage}
             multiline
             textAlignVertical="center"
           />
-
           <TouchableOpacity
             onPress={handleSend}
             disabled={!newMessage.trim() || isSending}
-            className={`px-5 py-3 rounded-full ${
+            className={`px-4 py-3 rounded-full items-center justify-center ${
               newMessage.trim() && !isSending
                 ? "bg-sky-700 dark:bg-slate-700"
                 : "bg-gray-300"
@@ -243,13 +247,11 @@ export default function ChatScreen({ route, navigation }) {
             {isSending ? (
               <ActivityIndicator size="small" color="white" />
             ) : (
-              <Text
-                className={`font-medium ${
-                  newMessage.trim() ? "text-white" : "text-gray-500"
-                }`}
-              >
-                Send
-              </Text>
+              <FontAwesome
+                name="paper-plane"
+                size={18}
+                color={newMessage.trim() && !isSending ? "white" : "#6b7280"}
+              />
             )}
           </TouchableOpacity>
         </View>

@@ -8,11 +8,11 @@ import {
   Alert,
 } from "react-native";
 import { RTCView } from "react-native-webrtc";
-import { IconButton, Button } from "react-native-paper";
 import { StatusBar } from "expo-status-bar";
 import { useColorScheme } from "nativewind";
 import { useSocket } from "../../hooks/useSocket";
 import { useCall } from "../../hooks/useCall";
+import { FontAwesome } from "@expo/vector-icons";
 
 export default function CallScreen({ route, navigation }) {
   const { socket, isConnected } = useSocket();
@@ -36,13 +36,6 @@ export default function CallScreen({ route, navigation }) {
     const newMuted = !muted;
     setMuted(newMuted);
 
-    if (call.toggleMute) {
-      try {
-        call.toggleMute(newMuted);
-        return;
-      } catch (e) {}
-    }
-
     try {
       call.localStream?.getAudioTracks().forEach((t) => {
         t.enabled = !newMuted;
@@ -54,13 +47,6 @@ export default function CallScreen({ route, navigation }) {
     const newVideoEnabled = !videoEnabled;
     setVideoEnabled(newVideoEnabled);
 
-    if (call.toggleVideo) {
-      try {
-        call.toggleVideo(newVideoEnabled);
-        return;
-      } catch (e) {}
-    }
-
     try {
       call.localStream?.getVideoTracks().forEach((t) => {
         t.enabled = newVideoEnabled;
@@ -69,51 +55,35 @@ export default function CallScreen({ route, navigation }) {
   };
 
   const switchCamera = () => {
-    if (call.switchCamera) {
-      call.switchCamera().catch((e) => {
-        Alert.alert("Switch camera failed", String(e));
-      });
-      return;
-    }
-
     try {
       const vt = call.localStream?.getVideoTracks?.()[0];
       if (vt && typeof vt._switchCamera === "function") {
         vt._switchCamera();
         return;
       }
-      Alert.alert("Switch camera", "Switch camera is not available.");
+      Alert.alert("Switch camera", "Not available.");
     } catch (e) {
       Alert.alert("Switch camera failed", String(e));
     }
   };
 
   const toggleSpeaker = () => {
-    const newSpeaker = !speakerOn;
-    setSpeakerOn(newSpeaker);
-
-    if (call.toggleSpeaker) {
-      call.toggleSpeaker(newSpeaker).catch(() => {});
-      return;
-    }
+    setSpeakerOn(!speakerOn);
   };
 
-  const answerCall = async () => {
-    if (call.answerCall) return call.answerCall();
-    Alert.alert("Answer", "No answer handler available.");
+  const answerCall = () => {
+    if (call.answerCall) call.answerCall();
   };
 
-  const endCall = async () => {
-    if (call.endCall) {
-      call.endCall();
-    } else {
-      navigation.goBack();
-    }
+  const endCall = () => {
+    if (call.endCall) call.endCall();
+    else navigation.goBack();
   };
 
   useEffect(() => {
     if (!call.localStream) setVideoEnabled(false);
     else setVideoEnabled(true);
+
     try {
       const aud = call.localStream?.getAudioTracks?.()[0];
       if (aud) setMuted(!aud.enabled);
@@ -128,35 +98,37 @@ export default function CallScreen({ route, navigation }) {
         style={{ borderColor: isDark ? "#111" : "#e6e6e6" }}
       >
         <View className="flex-row items-center">
-          <IconButton
-            icon="arrow-left"
-            mode="contained"
-            size={22}
-            onPress={() => navigation.goBack()}
-            style={{ backgroundColor: "transparent" }}
-            iconColor={isDark ? "#fff" : "#0c5991"}
-          />
+          <Pressable onPress={() => navigation.goBack()} className="p-2">
+            <FontAwesome
+              name="arrow-left"
+              size={22}
+              color={isDark ? "#fff" : "#0c5991"}
+            />
+          </Pressable>
+
           <View>
             <Text
-              className={`text-lg font-bold ${isDark ? "text-white" : "text-slate-800"}`}
+              className={`text-lg font-bold ${
+                isDark ? "text-white" : "text-slate-800"
+              }`}
             >
               Call
             </Text>
             <Text
-              className={`text-xs ${isDark ? "text-slate-300" : "text-slate-500"}`}
+              className={`text-xs ${
+                isDark ? "text-slate-300" : "text-slate-500"
+              }`}
             >
               {statusLabel}
             </Text>
           </View>
         </View>
 
-        <View className="items-end">
-          <Text
-            className={`text-xs ${isDark ? "text-slate-300" : "text-slate-500"}`}
-          >
-            Calling: <Text className="font-medium">{peerName}</Text>
-          </Text>
-        </View>
+        <Text
+          className={`text-xs ${isDark ? "text-slate-300" : "text-slate-500"}`}
+        >
+          Calling: <Text className="font-medium">{peerName}</Text>
+        </Text>
       </View>
 
       <View className="flex-1 items-center justify-center px-4">
@@ -172,163 +144,210 @@ export default function CallScreen({ route, navigation }) {
                 backgroundColor: "#000",
               }}
             />
-            <View
-              className="absolute top-4 left-4 px-3 py-1 rounded-full"
-              style={{ backgroundColor: "rgba(0,0,0,0.45)" }}
-            >
-              <Text className="text-sm text-white">
-                {call.incomingOffer?.fromUsername || "Remote"}
-              </Text>
-            </View>
           </View>
         ) : (
-          <View className="w-full h-full items-center justify-center">
-            <View className="items-center">
-              <ActivityIndicator size="large" />
-              <Text
-                className={`mt-4 ${isDark ? "text-slate-300" : "text-slate-600"}`}
-              >
-                Waiting for remote video...
-              </Text>
-            </View>
+          <View className="items-center">
+            <ActivityIndicator size="large" />
+            <Text
+              className={`mt-4 ${isDark ? "text-slate-300" : "text-slate-600"}`}
+            >
+              Waiting for remote video...
+            </Text>
           </View>
         )}
 
         {call.localStream && (
           <View className="absolute top-4 right-4">
-            <Pressable
-              onPress={() => {
-                Alert.alert("Preview", "Local preview tapped.");
+            <RTCView
+              streamURL={call.localStream.toURL()}
+              objectFit="cover"
+              style={{
+                width: 140,
+                height: 190,
+                borderRadius: 12,
+                borderWidth: 2,
+                borderColor: isDark ? "#111827" : "#e6eef8",
+                backgroundColor: "#111",
               }}
-            >
-              <RTCView
-                streamURL={call.localStream.toURL()}
-                objectFit="cover"
-                style={{
-                  width: 140,
-                  height: 190,
-                  borderRadius: 12,
-                  borderWidth: 2,
-                  borderColor: isDark ? "#111827" : "#e6eef8",
-                  backgroundColor: "#111",
-                }}
-              />
-            </Pressable>
+            />
           </View>
         )}
       </View>
 
       {call.incomingOffer && !route?.params?.isCaller && (
         <View className="px-6 pb-4">
-          <View className="bg-slate-100 dark:bg-neutral-900 p-3 rounded-lg flex-row items-center justify-between">
-            <View>
-              <Text
-                className={`${isDark ? "text-white" : "text-slate-800"} font-semibold`}
-              >
-                Incoming call
-              </Text>
-              <Text
-                className={`${isDark ? "text-slate-300" : "text-slate-500"} text-sm`}
-              >
-                {call.incomingOffer.fromUsername || "Caller"}
-              </Text>
-            </View>
+          <View className="p-4 rounded-lg bg-slate-100 dark:bg-neutral-900">
+            <Text
+              className={`font-semibold ${
+                isDark ? "text-white" : "text-slate-800"
+              }`}
+            >
+              Incoming call
+            </Text>
 
-            <View className="flex-row">
-              <Button
-                mode="contained"
+            <Text
+              className={`text-sm mb-3 ${
+                isDark ? "text-slate-300" : "text-slate-500"
+              }`}
+            >
+              {call.incomingOffer.fromUsername || "Caller"}
+            </Text>
+
+            <View className="flex-row space-x-4">
+              <Pressable
                 onPress={answerCall}
-                labelStyle={{ color: "#fff" }}
-                style={{ marginRight: 8, backgroundColor: "#0c5991" }}
-                icon="phone"
+                className="px-4 py-2 rounded-full flex-row items-center"
+                style={{ backgroundColor: "#0c5991" }}
               >
-                Answer
-              </Button>
+                <FontAwesome name="phone" size={16} color="#fff" />
+                <Text className="text-white ml-2">Answer</Text>
+              </Pressable>
 
-              <Button
-                mode="outlined"
+              <Pressable
                 onPress={endCall}
-                labelStyle={{ color: isDark ? "#ff6b6b" : "#ef4444" }}
-                style={{ borderColor: isDark ? "#3b3b3b" : "#ef4444" }}
-                icon="phone-hangup"
+                className="px-4 py-2 rounded-full flex-row items-center border"
+                style={{ borderColor: "#ef4444" }}
               >
-                Decline
-              </Button>
+                <FontAwesome name="phone" size={16} color="#ef4444" />
+                <Text
+                  className="ml-2"
+                  style={{ color: isDark ? "#ff6b6b" : "#ef4444" }}
+                >
+                  Decline
+                </Text>
+              </Pressable>
             </View>
           </View>
         </View>
       )}
 
       <View
-        className="px-6 py-4 border-t"
+        className="px-6 py-6 border-t"
         style={{ borderColor: isDark ? "#0b0b0b" : "#eee" }}
       >
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row space-x-2">
-            <IconButton
-              icon={muted ? "microphone-off" : "microphone"}
-              size={24}
-              mode="contained"
-              onPress={toggleMute}
+        <View className="flex-row items-center justify-around w-full">
+          <Pressable onPress={toggleMute} className="items-center">
+            <View
               style={{
+                width: 60,
+                height: 60,
+                borderRadius: 30,
+                justifyContent: "center",
+                alignItems: "center",
+                borderWidth: 1,
+                borderColor: "#0c5991",
                 backgroundColor: muted ? "#1f2937" : "transparent",
-                borderColor: "#0c5991",
-                borderWidth: 1,
               }}
-              iconColor={muted ? "#fff" : "#0c5991"}
-            />
-
-            <IconButton
-              icon={videoEnabled ? "video" : "video-off"}
-              size={24}
-              mode="contained"
-              onPress={toggleVideo}
-              style={{
-                backgroundColor: videoEnabled ? "transparent" : "#1f2937",
-                borderColor: "#0c5991",
-                borderWidth: 1,
-              }}
-              iconColor={videoEnabled ? "#0c5991" : "#fff"}
-            />
-
-            <IconButton
-              icon="camera-switch"
-              size={24}
-              mode="contained"
-              onPress={switchCamera}
-              style={{
-                backgroundColor: "transparent",
-                borderColor: "#0c5991",
-                borderWidth: 1,
-              }}
-              iconColor="#0c5991"
-            />
-
-            <IconButton
-              icon={speakerOn ? "speaker" : "speaker-off"}
-              size={24}
-              mode="contained"
-              onPress={toggleSpeaker}
-              style={{
-                backgroundColor: speakerOn ? "transparent" : "#1f2937",
-                borderColor: "#0c5991",
-                borderWidth: 1,
-              }}
-              iconColor={speakerOn ? "#0c5991" : "#fff"}
-            />
-          </View>
-
-          <View>
-            <Button
-              mode="contained"
-              onPress={endCall}
-              icon="phone-hangup"
-              style={{ backgroundColor: "#ef4444", paddingHorizontal: 18 }}
-              labelStyle={{ color: "#fff" }}
             >
-              End
-            </Button>
-          </View>
+              <FontAwesome
+                name={muted ? "microphone-slash" : "microphone"}
+                size={22}
+                color={muted ? "#fff" : "#0c5991"}
+              />
+            </View>
+            <Text
+              className={`mt-2 text-xs ${
+                isDark ? "text-slate-300" : "text-slate-600"
+              }`}
+            >
+              Mute
+            </Text>
+          </Pressable>
+
+          <Pressable onPress={toggleVideo} className="items-center">
+            <View
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: 30,
+                justifyContent: "center",
+                alignItems: "center",
+                borderWidth: 1,
+                borderColor: "#0c5991",
+                backgroundColor: videoEnabled ? "transparent" : "#1f2937",
+              }}
+            >
+              <FontAwesome
+                name="video-camera"
+                size={22}
+                color={videoEnabled ? "#0c5991" : "#fff"}
+              />
+            </View>
+            <Text
+              className={`mt-2 text-xs ${
+                isDark ? "text-slate-300" : "text-slate-600"
+              }`}
+            >
+              Video
+            </Text>
+          </Pressable>
+
+          <Pressable onPress={switchCamera} className="items-center">
+            <View
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: 30,
+                justifyContent: "center",
+                alignItems: "center",
+                borderWidth: 1,
+                borderColor: "#0c5991",
+              }}
+            >
+              <FontAwesome name="exchange" size={22} color="#0c5991" />
+            </View>
+            <Text
+              className={`mt-2 text-xs ${
+                isDark ? "text-slate-300" : "text-slate-600"
+              }`}
+            >
+              Switch
+            </Text>
+          </Pressable>
+
+          <Pressable onPress={toggleSpeaker} className="items-center">
+            <View
+              style={{
+                width: 60,
+                height: 60,
+                borderRadius: 30,
+                justifyContent: "center",
+                alignItems: "center",
+                borderWidth: 1,
+                borderColor: "#0c5991",
+                backgroundColor: speakerOn ? "transparent" : "#1f2937",
+              }}
+            >
+              <FontAwesome
+                name={speakerOn ? "volume-up" : "volume-off"}
+                size={22}
+                color={speakerOn ? "#0c5991" : "#fff"}
+              />
+            </View>
+            <Text
+              className={`mt-2 text-xs ${
+                isDark ? "text-slate-300" : "text-slate-600"
+              }`}
+            >
+              Speaker
+            </Text>
+          </Pressable>
+        </View>
+
+        <View className="items-center mt-8">
+          <Pressable
+            onPress={endCall}
+            style={{
+              width: 75,
+              height: 75,
+              borderRadius: 37.5,
+              backgroundColor: "#ef4444",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <FontAwesome name="phone" size={26} color="#fff" />
+          </Pressable>
         </View>
       </View>
     </SafeAreaView>

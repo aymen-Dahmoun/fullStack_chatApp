@@ -19,6 +19,7 @@ export function useCall({ route, navigation, socket, isConnected }) {
   const callActiveRef = useRef(false);
   const localStreamRef = useRef(null);
   const remoteStreamRef = useRef(null);
+  const pendingIceCandidatesRef = useRef([]);
 
   const setupPeerConnection = useCallback(() => {
     if (pcServiceRef.current) return pcServiceRef.current;
@@ -39,12 +40,24 @@ export function useCall({ route, navigation, socket, isConnected }) {
         }
       },
       onConnectionStateChange: (state) => {
-        console.log("pc connection state:", state);
-        if (
-          state === "failed" ||
-          (state === "disconnected" && hasRemoteDescriptionRef.current)
-        ) {
+        console.log("connection state:", state);
+        if (state === "connected") {
+          setCallStatus("in-call");
+        } else if (state === "connecting") {
+          setCallStatus("connecting");
+        } else if (state === "failed") {
           endCall();
+        } else if (
+          state === "disconnected" &&
+          hasRemoteDescriptionRef.current
+        ) {
+          console.warn("Connection disconnected");
+          setTimeout(() => {
+            if (pcServiceRef.current?.pc?.connectionState === "disconnected") {
+              console.log("Still disconnected after timeout, ending call");
+              endCall();
+            }
+          }, 5000); // 5 seconds to reconnect
         }
       },
     });
@@ -121,6 +134,13 @@ export function useCall({ route, navigation, socket, isConnected }) {
       await pcServiceRef.current.setRemoteDescription(incomingOffer.offer);
       hasRemoteDescriptionRef.current = true;
 
+      if (pendingIceCandidatesRef.current.length > 0) {
+        for (const candidate of pendingIceCandidatesRef.current) {
+          await pcServiceRef.current.addIceCandidate(candidate);
+        }
+        pendingIceCandidatesRef.current = [];
+      }
+
       const answer = await pcServiceRef.current.createAnswer();
       socket.emit("answer", { to: incomingOffer.from, answer });
 
@@ -157,6 +177,9 @@ export function useCall({ route, navigation, socket, isConnected }) {
     setLocalStream(null);
     setRemoteStream(null);
 
+    pendingIceCandidatesRef.current = [];
+    hasRemoteDescriptionRef.current = false;
+
     if (callActiveRef.current) {
       setCallStatus("ended");
       callActiveRef.current = false;
@@ -191,6 +214,17 @@ export function useCall({ route, navigation, socket, isConnected }) {
       try {
         await pcServiceRef.current.setRemoteDescription(data.answer);
         hasRemoteDescriptionRef.current = true;
+
+        if (pendingIceCandidatesRef.current.length > 0) {
+          console.log(
+            `Processing ${pendingIceCandidatesRef.current.length} pending ICE candidates`,
+          );
+          for (const candidate of pendingIceCandidatesRef.current) {
+            await pcServiceRef.current.addIceCandidate(candidate);
+          }
+          pendingIceCandidatesRef.current = [];
+        }
+
         setCallStatus("in-call");
       } catch (err) {
         console.error("Failed to set remote description", err);
@@ -199,6 +233,13 @@ export function useCall({ route, navigation, socket, isConnected }) {
 
     const handleIce = async (data) => {
       if (!pcServiceRef.current || !data?.candidate) return;
+
+      if (!hasRemoteDescriptionRef.current) {
+        console.log("Queuing ICE candidate (remote description not set yet)");
+        pendingIceCandidatesRef.current.push(data.candidate);
+        return;
+      }
+
       await pcServiceRef.current.addIceCandidate(data.candidate);
     };
 
