@@ -1,24 +1,29 @@
-import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
-import Constants from 'expo-constants';
+import axios from "axios";
+import * as SecureStore from "expo-secure-store";
+
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_LINK;
 
 const api = axios.create({
-  baseURL: 'https://fullstack-chatapp-71vx.onrender.com', //Constants.expoConfig.extra.API_LINK || 'http://localhost:5000',
+  baseURL: API_BASE_URL,
   timeout: 10000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
+console.log("API baseURL:", API_BASE_URL);
+
 api.interceptors.request.use(
   async (config) => {
-    const token = await SecureStore.getItemAsync('token');
+    const token = await SecureStore.getItemAsync("token");
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 api.interceptors.response.use(

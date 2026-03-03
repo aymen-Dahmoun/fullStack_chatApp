@@ -3,7 +3,7 @@ import { View, Text, Switch, Alert } from "react-native";
 import { Button } from "react-native-paper";
 import { useColorScheme } from "nativewind";
 import { StatusBar } from "expo-status-bar";
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from "expo-secure-store";
 import { useAuth } from "../../context/authContext";
 
 export default function SettingsScreen() {
@@ -18,10 +18,10 @@ export default function SettingsScreen() {
 
   const handleLogout = async () => {
     try {
-      await SecureStore.setItemAsync('tokrn', '');
+      await SecureStore.setItemAsync("token", "");
       setUser(null);
     } catch (error) {
-      Alert.alert('Logout Failed', error.message || String(error));
+      Alert.alert("Logout Failed", error.message || String(error));
     }
   };
 
@@ -46,13 +46,12 @@ export default function SettingsScreen() {
         />
       </View>
 
-      {/* Fun Buttons */}
       <Button
         mode="outlined"
         icon="rocket"
         onPress={() => console.log("Launched a potato")}
-        style={{ marginBottom: 12, borderColor: '#0c5991' }}
-        labelStyle={{ color: colorScheme === 'dark' ? '#36bcf5' : '#0c5991' }}
+        style={{ marginBottom: 12, borderColor: "#0c5991" }}
+        labelStyle={{ color: colorScheme === "dark" ? "#36bcf5" : "#0c5991" }}
       >
         Launch Potato
       </Button>
@@ -61,8 +60,8 @@ export default function SettingsScreen() {
         mode="outlined"
         icon="bug"
         onPress={() => console.log("Debugging dreams...")}
-        style={{ marginBottom: 12, borderColor: '#0c5991' }}
-        labelStyle={{ color: colorScheme === 'dark' ? '#36bcf5' : '#0c5991' }}
+        style={{ marginBottom: 12, borderColor: "#0c5991" }}
+        labelStyle={{ color: colorScheme === "dark" ? "#36bcf5" : "#0c5991" }}
       >
         Debug Reality
       </Button>
@@ -71,19 +70,18 @@ export default function SettingsScreen() {
         mode="outlined"
         icon="alien"
         onPress={() => console.log("Contacting aliens...")}
-        style={{ marginBottom: 12, borderColor: '#0c5991' }}
-        labelStyle={{ color: colorScheme === 'dark' ? '#36bcf5' : '#0c5991' }}
+        style={{ marginBottom: 12, borderColor: "#0c5991" }}
+        labelStyle={{ color: colorScheme === "dark" ? "#36bcf5" : "#0c5991" }}
       >
         Contact Aliens
       </Button>
 
-      {/* Logout Button (same style as above) */}
       <Button
         mode="outlined"
         icon="logout"
         onPress={handleLogout}
-        style={{ marginTop: 24, borderColor: '#0c5991' }}
-        labelStyle={{ color: colorScheme === 'dark' ? '#36bcf5' : '#0c5991' }}
+        style={{ marginTop: 24, borderColor: "#0c5991" }}
+        labelStyle={{ color: colorScheme === "dark" ? "#36bcf5" : "#0c5991" }}
       >
         Logout
       </Button>

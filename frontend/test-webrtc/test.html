@@ -1,0 +1,411 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WebRTC Phone-to-Browser Test</title>
+    <style>
+      body {
+        background: #0b0b0b;
+        color: #f5f5f5;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 16px;
+      }
+      .row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      input {
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 1px solid #333;
+        background: #101010;
+        color: #f5f5f5;
+        min-width: 320px;
+      }
+      button {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 0;
+        background: #16a34a;
+        color: #fff;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: #ef4444;
+      }
+      video {
+        width: 100%;
+        max-width: 640px;
+        border-radius: 12px;
+        background: #111;
+      }
+      pre {
+        background: #111;
+        padding: 10px;
+        border-radius: 8px;
+        max-height: 240px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>WebRTC Phone-to-Browser Test</h2>
+
+    <div class="row">
+      <label for="socketUrl">Socket URL</label>
+      <input id="socketUrl" value="http://socket/api url" />
+    </div>
+
+    <div class="row">
+      <label for="token">JWT Token</label>
+      <input id="token" placeholder="Paste token from phone logs" />
+      <button id="connectBtn">Connect</button>
+      <button id="disconnectBtn" class="secondary">Disconnect</button>
+    </div>
+
+    <div class="row">
+      <div id="userInfo"></div>
+    </div>
+
+    <div class="row">
+      <div>
+        <h3>Local Stream</h3>
+        <video
+          id="local"
+          autoplay
+          playsinline
+          muted
+          style="
+            width: 100%;
+            max-width: 320px;
+            border-radius: 12px;
+            background: #111;
+          "
+        ></video>
+        <div class="row" style="margin-top: 8px; gap: 8px">
+          <button id="toggleAudioBtn">Mute Audio</button>
+          <button id="toggleVideoBtn">Stop Video</button>
+        </div>
+      </div>
+      <div>
+        <h3>Remote Stream</h3>
+        <video
+          id="remote"
+          autoplay
+          playsinline
+          controls
+          style="
+            width: 100%;
+            max-width: 320px;
+            border-radius: 12px;
+            background: #111;
+          "
+        ></video>
+      </div>
+    </div>
+
+    <pre id="log"></pre>
+
+    <script>
+      const logEl = document.getElementById("log");
+      const socketUrlInput = document.getElementById("socketUrl");
+      const tokenInput = document.getElementById("token");
+      const connectBtn = document.getElementById("connectBtn");
+      const disconnectBtn = document.getElementById("disconnectBtn");
+      const remoteVideo = document.getElementById("remote");
+      const localVideo = document.getElementById("local");
+      const toggleAudioBtn = document.getElementById("toggleAudioBtn");
+      const toggleVideoBtn = document.getElementById("toggleVideoBtn");
+      const userInfoEl = document.getElementById("userInfo");
+
+      let playInFlight = false;
+      let lastStreamId = null;
+      let localStream = null;
+      let audioEnabled = true;
+      let videoEnabled = true;
+
+      const safePlay = () => {
+        if (playInFlight || !remoteVideo.srcObject) return;
+        playInFlight = true;
+        const playPromise = remoteVideo.play();
+        if (playPromise && typeof playPromise.then === "function") {
+          playPromise
+            .then(() => {
+              log("Video playback started");
+            })
+            .catch((err) => {
+              log(`Autoplay/playback issue: ${err.message}`);
+            })
+            .finally(() => {
+              playInFlight = false;
+            });
+        } else {
+          playInFlight = false;
+        }
+      };
+
+      let socket = null;
+      let pc = null;
+      let currentPeerId = null;
+      const pendingCandidates = [];
+
+      const log = (msg) => {
+        const timestamp = new Date().toISOString();
+        logEl.textContent = `[${timestamp}] ${msg}\n` + logEl.textContent;
+      };
+      const ICE_SERVERS = [
+        { urls: "stun:stun.cloudflare.com:3478" },
+        {
+          urls: [
+            "turn:turn.cloudflare.com:3478?transport=udp",
+            "turn:turn.cloudflare.com:3478?transport=tcp",
+            "turns:turn.cloudflare.com:5349?transport=tcp",
+          ],
+          username:
+            "g0bb58cb25ecf569a219f2cb2bca0043815dbc0f79bb77ebf722de161d898568",
+          credential:
+            "f99d648bf2d8b651ab39ecfd6db8b393b0a19c3df668a8b1987358d16a62b6d5",
+        },
+      ];
+
+      const createPeerConnection = () => {
+        if (pc) return;
+        pc = new RTCPeerConnection({
+          iceServers: ICE_SERVERS,
+        });
+
+        pc.ontrack = (event) => {
+          const stream = event.streams[0];
+          if (!stream) {
+            log("Track received but stream is missing");
+            return;
+          }
+
+          if (lastStreamId !== stream.id) {
+            lastStreamId = stream.id;
+            remoteVideo.srcObject = stream;
+            log(`Remote stream set: ${stream.id}`);
+
+            if (remoteVideo.readyState === remoteVideo.HAVE_ENOUGH_DATA) {
+              safePlay();
+            } else {
+              remoteVideo.onloadedmetadata = () => {
+                log("Remote metadata loaded");
+                safePlay();
+              };
+            }
+          }
+
+          log("Remote track received");
+          safePlay();
+        };
+
+        pc.onicecandidate = (event) => {
+          if (event.candidate && socket && currentPeerId) {
+            socket.emit("ice-candidate", {
+              to: currentPeerId,
+              candidate: event.candidate,
+            });
+          }
+        };
+
+        pc.onconnectionstatechange = () => {
+          log(`Connection state: ${pc.connectionState}`);
+          if (
+            pc.connectionState === "failed" ||
+            pc.connectionState === "closed"
+          ) {
+            log("Connection lost, clearing remote video");
+            remoteVideo.srcObject = null;
+          }
+        };
+
+        pc.oniceconnectionstatechange = () => {
+          log(`ICE connection state: ${pc.iceConnectionState}`);
+        };
+      };
+
+      const applyPendingCandidates = async () => {
+        while (pendingCandidates.length > 0) {
+          const candidate = pendingCandidates.shift();
+          await pc.addIceCandidate(candidate);
+        }
+      };
+
+      const getLocalStream = async () => {
+        try {
+          if (localStream) {
+            log("Local stream already initialized");
+            return localStream;
+          }
+
+          localStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: true,
+          });
+
+          localVideo.srcObject = localStream;
+          log("Local stream acquired and displayed");
+          return localStream;
+        } catch (err) {
+          log(`Error getting local stream: ${err.message}`);
+          return null;
+        }
+      };
+
+      const toggleAudio = () => {
+        if (!localStream) return;
+        const audioTracks = localStream.getAudioTracks();
+        audioEnabled = !audioEnabled;
+        audioTracks.forEach((track) => {
+          track.enabled = audioEnabled;
+        });
+        toggleAudioBtn.textContent = audioEnabled
+          ? "Mute Audio"
+          : "Unmute Audio";
+        log(`Audio ${audioEnabled ? "enabled" : "disabled"}`);
+      };
+
+      const toggleVideo = () => {
+        if (!localStream) return;
+        const videoTracks = localStream.getVideoTracks();
+        videoEnabled = !videoEnabled;
+        videoTracks.forEach((track) => {
+          track.enabled = videoEnabled;
+        });
+        toggleVideoBtn.textContent = videoEnabled
+          ? "Stop Video"
+          : "Start Video";
+        log(`Video ${videoEnabled ? "enabled" : "disabled"}`);
+      };
+
+      const connectSocket = () => {
+        if (socket) return;
+        const socketUrl = socketUrlInput.value.trim();
+        const token = tokenInput.value.trim();
+
+        if (!socketUrl || !token) {
+          log("Socket URL and token are required.");
+          return;
+        }
+
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          userInfoEl.textContent = `Token user: ${payload.username} (${payload.id})`;
+        } catch (err) {
+          userInfoEl.textContent = "Token user: unable to decode";
+        }
+
+        const script = document.createElement("script");
+        script.src = `${socketUrl}/socket.io/socket.io.js`;
+        script.onload = () => {
+          socket = io(socketUrl, {
+            auth: { token },
+            transports: ["websocket"],
+          });
+
+          socket.on("connect", () => {
+            log(`Connected: ${socket.id}`);
+          });
+
+          socket.on("connect_error", (err) => {
+            log(`Connect error: ${err.message}`);
+          });
+
+          socket.on("offer", async (data) => {
+            try {
+              log(`Offer received from ${data?.from}`);
+              currentPeerId = data.from;
+              createPeerConnection();
+
+              const stream = await getLocalStream();
+              if (stream) {
+                stream.getTracks().forEach((track) => {
+                  pc.addTrack(track, stream);
+                });
+                log("Local tracks added to peer connection");
+              }
+
+              await pc.setRemoteDescription(
+                new RTCSessionDescription(data.offer),
+              );
+
+              await applyPendingCandidates();
+
+              const answer = await pc.createAnswer();
+              await pc.setLocalDescription(answer);
+
+              socket.emit("answer", { to: currentPeerId, answer });
+              log("Answer sent");
+            } catch (err) {
+              log(`Offer handling error: ${err.message}`);
+            }
+          });
+
+          socket.on("ice-candidate", async (data) => {
+            if (!pc) {
+              pendingCandidates.push(new RTCIceCandidate(data.candidate));
+              return;
+            }
+            try {
+              await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+            } catch (err) {
+              log(`ICE error: ${err.message}`);
+            }
+          });
+
+          socket.on("call-ended", () => {
+            log("Call ended");
+            if (pc) {
+              pc.close();
+              pc = null;
+              lastStreamId = null;
+            }
+            currentPeerId = null;
+            remoteVideo.srcObject = null;
+          });
+
+          socket.on("call-rejected", (data) => {
+            log(`Call rejected: ${data?.reason || "unknown"}`);
+          });
+        };
+        script.onerror = () => {
+          log("Failed to load socket.io client script.");
+        };
+
+        document.head.appendChild(script);
+      };
+
+      const disconnectSocket = () => {
+        if (socket) {
+          socket.disconnect();
+          socket = null;
+          log("Socket disconnected");
+        }
+        if (pc) {
+          pc.close();
+          pc = null;
+          lastStreamId = null;
+        }
+        if (localStream) {
+          localStream.getTracks().forEach((track) => track.stop());
+          localStream = null;
+          localVideo.srcObject = null;
+        }
+        currentPeerId = null;
+        remoteVideo.srcObject = null;
+      };
+
+      connectBtn.addEventListener("click", connectSocket);
+      disconnectBtn.addEventListener("click", disconnectSocket);
+      toggleAudioBtn.addEventListener("click", toggleAudio);
+      toggleVideoBtn.addEventListener("click", toggleVideo);
+      document.body.addEventListener("click", safePlay);
+    </script>
+  </body>
+</html>

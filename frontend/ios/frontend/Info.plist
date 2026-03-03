@@ -44,6 +44,10 @@
       <key>NSAllowsLocalNetworking</key>
       <true/>
     </dict>
+    <key>NSCameraUsageDescription</key>
+    <string>Allow access to the camera for calls.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Allow access to the microphone for calls.</string>
     <key>UILaunchStoryboardName</key>
     <string>SplashScreen</string>
     <key>UIRequiredDeviceCapabilities</key>

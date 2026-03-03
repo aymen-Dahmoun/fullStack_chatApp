@@ -13,6 +13,7 @@
 * 🔐 **User Authentication** with JWT + bcryptjs
 * ⚡ **Real-Time Messaging** using Socket.IO
 * 💬 **Private Chats** (1-on-1 conversations)
+* 📞 **Voice & Video Calling** with WebRTC signaling
 * 💾 **Persistent Data** stored in PostgreSQL via Sequelize
 * 📱 **Cross-Platform Frontend** (iOS + Android)
 * 🎨 **Tailwind CSS UI** using NativeWind
@@ -141,11 +142,23 @@ Scan the QR code with the Expo Go app on your device to run the application.
 | `chat message` | Client sends a message (`content`, `conversationId`, `receiverId`); server broadcasts to recipient |
 | `disconnect`   | User disconnects from the socket                                                                   |
 
+### 📞 WebRTC Signaling
+
+| Event           | Description                                                                 |
+| --------------- | --------------------------------------------------------------------------- |
+| `offer`         | Caller sends an SDP offer to a specific user                                |
+| `answer`        | Receiver responds with an SDP answer                                        |
+| `ice-candidate` | Each side sends ICE candidates for network routing                          |
+| `end-call`      | Caller/receiver ends a call; server relays `call-ended` to the peer         |
+| `reject-call`   | Receiver rejects a call; server relays `call-rejected` to the peer          |
+
+> Note: Calls use 1:1 signaling via Socket.IO, then media flows peer-to-peer.
+
 ---
 
 ## 🔮 Future Plans
 
-* 📞 **Voice & Video Calling** (WebRTC)
+* 👥 **Group Calling** (multi-party WebRTC)
 * 📁 **File Sharing** (images, PDFs, documents)
 * 📸 **Screenshot Sharing**
 

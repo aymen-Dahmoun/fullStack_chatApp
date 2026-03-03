@@ -1,5 +1,3 @@
-// hooks/useChat.js
-
 import { useEffect, useState } from "react";
 import api from "../api/ax";
 
@@ -8,20 +6,21 @@ export default function useChat(conversationId) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
   useEffect(() => {
     const getConversations = async () => {
-      if (!conversationId){
+      if (!conversationId) {
         return {
           data,
           loading,
           error,
-          setMessages: setData
+          setMessages: setData,
         };
       }
 
       try {
-        const response = await api.get(`/api/conversation/chat/${conversationId}`);
+        const response = await api.get(
+          `/api/conversation/chat/${conversationId}`,
+        );
         // console.log("convs from useChat: ", response.data);
         setData(response.data);
       } catch (err) {
@@ -39,6 +38,6 @@ export default function useChat(conversationId) {
     data,
     loading,
     error,
-    setMessages: setData
+    setMessages: setData,
   };
 }
