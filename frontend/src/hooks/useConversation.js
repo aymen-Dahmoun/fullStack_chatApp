@@ -12,7 +12,7 @@ export default function useConversation() {
     const getConversations = async () => {
       try {
         const response = await api.get(`/api/conversation/${user.id}`);
-        console.log('convs: ',response.data)
+        console.log("convs: ", response.data[0].lastMessage);
         setData(response.data);
       } catch (err) {
         console.error("Failed to fetch conversations:", err);

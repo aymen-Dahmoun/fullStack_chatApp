@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>WebRTC Phone-to-Browser Test</title>
+    <title>WebRTC Phone-to-Browser Test (Caller + Callee)</title>
     <style>
       body {
         background: #0b0b0b;
@@ -25,7 +25,7 @@
         border: 1px solid #333;
         background: #101010;
         color: #f5f5f5;
-        min-width: 320px;
+        min-width: 240px;
       }
       button {
         padding: 8px 12px;
@@ -37,6 +37,10 @@
       }
       button.secondary {
         background: #ef4444;
+      }
+      button.ghost {
+        background: transparent;
+        border: 1px solid #333;
       }
       video {
         width: 100%;
@@ -51,14 +55,18 @@
         max-height: 240px;
         overflow: auto;
       }
+      .status {
+        font-size: 14px;
+        color: #9ca3af;
+      }
     </style>
   </head>
   <body>
-    <h2>WebRTC Phone-to-Browser Test</h2>
+    <h2>WebRTC Phone-to-Browser Test (Caller + Callee)</h2>
 
     <div class="row">
       <label for="socketUrl">Socket URL</label>
-      <input id="socketUrl" value="http://10.79.24.166:3000" />
+      <input id="socketUrl" value="http://192.168.1.33:3000" />
     </div>
 
     <div class="row">
@@ -69,7 +77,15 @@
     </div>
 
     <div class="row">
-      <div id="userInfo"></div>
+      <div id="userInfo" class="status"></div>
+    </div>
+
+    <div class="row">
+      <label for="calleeId">Callee ID</label>
+      <input id="calleeId" placeholder="target user id (callee)" />
+      <button id="callBtn">Call</button>
+      <button id="endCallBtn" class="secondary">End Call</button>
+      <button id="hangupLocalBtn" class="ghost">Hangup Local</button>
     </div>
 
     <div class="row">
@@ -112,6 +128,15 @@
     <pre id="log"></pre>
 
     <script>
+      /**********************************************
+       * WebRTC Phone-to-Browser: Caller + Callee
+       * - Caller uses "offer" event to send offer:
+       *    socket.emit("offer", { to: calleeId, offer });
+       * - Server must forward "offer" to callee (your mobile app)
+       * - Callee answers by emitting "answer" -> caller listens and sets remote desc
+       * - ICE candidates exchanged via "ice-candidate"
+       **********************************************/
+
       const logEl = document.getElementById("log");
       const socketUrlInput = document.getElementById("socketUrl");
       const tokenInput = document.getElementById("token");
@@ -122,12 +147,56 @@
       const toggleAudioBtn = document.getElementById("toggleAudioBtn");
       const toggleVideoBtn = document.getElementById("toggleVideoBtn");
       const userInfoEl = document.getElementById("userInfo");
+      const callBtn = document.getElementById("callBtn");
+      const endCallBtn = document.getElementById("endCallBtn");
+      const hangupLocalBtn = document.getElementById("hangupLocalBtn");
+      const calleeIdInput = document.getElementById("calleeId");
 
       let playInFlight = false;
       let lastStreamId = null;
       let localStream = null;
       let audioEnabled = true;
       let videoEnabled = true;
+
+      // WebAudio-based ringtone (outgoing)
+      let audioCtx = null;
+      let ringtoneOsc = null;
+      function startRingtone() {
+        try {
+          if (!audioCtx)
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          stopRingtone();
+          ringtoneOsc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          ringtoneOsc.type = "sine";
+          ringtoneOsc.frequency.value = 620;
+          gain.gain.value = 0.02;
+          ringtoneOsc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          ringtoneOsc.start();
+
+          // slight modulation
+          setTimeout(() => {
+            if (ringtoneOsc) ringtoneOsc.frequency.value = 520;
+          }, 400);
+        } catch (e) {
+          log("Ringtone start failed: " + e.message);
+        }
+      }
+      function stopRingtone() {
+        try {
+          if (ringtoneOsc) {
+            try {
+              ringtoneOsc.stop();
+            } catch (e) {}
+            ringtoneOsc.disconnect();
+            ringtoneOsc = null;
+          }
+        } catch (e) {
+          /* ignore */
+        }
+      }
 
       const safePlay = () => {
         if (playInFlight || !remoteVideo.srcObject) return;
@@ -151,13 +220,14 @@
 
       let socket = null;
       let pc = null;
-      let currentPeerId = null;
+      let currentPeerId = null; // remote peer's user id
       const pendingCandidates = [];
 
       const log = (msg) => {
         const timestamp = new Date().toISOString();
         logEl.textContent = `[${timestamp}] ${msg}\n` + logEl.textContent;
       };
+
       const ICE_SERVERS = [
         { urls: "stun:stun.cloudflare.com:3478" },
         {
@@ -173,6 +243,7 @@
         },
       ];
 
+      // Create or re-create the RTCPeerConnection
       const createPeerConnection = () => {
         if (pc) return;
         pc = new RTCPeerConnection({
@@ -211,6 +282,7 @@
               to: currentPeerId,
               candidate: event.candidate,
             });
+            log("Sent ICE candidate to " + currentPeerId);
           }
         };
 
@@ -220,7 +292,7 @@
             pc.connectionState === "failed" ||
             pc.connectionState === "closed"
           ) {
-            log("Connection lost, clearing remote video");
+            log("Connection lost/closed, clearing remote video");
             remoteVideo.srcObject = null;
           }
         };
@@ -228,12 +300,19 @@
         pc.oniceconnectionstatechange = () => {
           log(`ICE connection state: ${pc.iceConnectionState}`);
         };
+
+        log("PeerConnection created");
       };
 
       const applyPendingCandidates = async () => {
         while (pendingCandidates.length > 0) {
           const candidate = pendingCandidates.shift();
-          await pc.addIceCandidate(candidate);
+          try {
+            await pc.addIceCandidate(candidate);
+            log("Applied pending candidate");
+          } catch (err) {
+            log("Failed to apply pending candidate: " + err.message);
+          }
         }
       };
 
@@ -284,6 +363,7 @@
         log(`Video ${videoEnabled ? "enabled" : "disabled"}`);
       };
 
+      // ---------- Socket connect / handlers ----------
       const connectSocket = () => {
         if (socket) return;
         const socketUrl = socketUrlInput.value.trim();
@@ -294,9 +374,10 @@
           return;
         }
 
+        // decode token for UI (optional)
         try {
           const payload = JSON.parse(atob(token.split(".")[1]));
-          userInfoEl.textContent = `Token user: ${payload.username} (${payload.id})`;
+          userInfoEl.textContent = `Token user: ${payload.username || payload.sub || ""} (${payload.id || payload.sub || "?"})`;
         } catch (err) {
           userInfoEl.textContent = "Token user: unable to decode";
         }
@@ -314,10 +395,31 @@
           });
 
           socket.on("connect_error", (err) => {
-            log(`Connect error: ${err.message}`);
+            log(`Connect error: ${err && err.message ? err.message : err}`);
           });
 
+          // --- Caller: receives answer from callee ---
+          socket.on("answer", async (data) => {
+            try {
+              log(`Answer received from ${data?.from}`);
+              if (!pc) {
+                log("No peerconnection, creating one");
+                createPeerConnection();
+              }
+              const remoteDesc = new RTCSessionDescription(data.answer);
+              await pc.setRemoteDescription(remoteDesc);
+              await applyPendingCandidates();
+              stopRingtone();
+              log("Remote description (answer) set");
+            } catch (err) {
+              log("Error handling answer: " + err.message);
+            }
+          });
+
+          // --- Callee: we already had "offer" handler earlier, but keep here to be safe ---
           socket.on("offer", async (data) => {
+            // If you want to auto-answer in browser (not recommended for production),
+            // you could implement auto-answer behavior here. Currently we keep your previous handler.
             try {
               log(`Offer received from ${data?.from}`);
               currentPeerId = data.from;
@@ -328,50 +430,49 @@
                 stream.getTracks().forEach((track) => {
                   pc.addTrack(track, stream);
                 });
-                log("Local tracks added to peer connection");
+                log(
+                  "Local tracks added to peer connection (callee flow in browser)",
+                );
               }
 
               await pc.setRemoteDescription(
                 new RTCSessionDescription(data.offer),
               );
-
               await applyPendingCandidates();
 
               const answer = await pc.createAnswer();
               await pc.setLocalDescription(answer);
 
               socket.emit("answer", { to: currentPeerId, answer });
-              log("Answer sent");
+              log("Answer sent (browser callee)");
             } catch (err) {
-              log(`Offer handling error: ${err.message}`);
+              log("Error in browser offer handler: " + err.message);
             }
           });
 
           socket.on("ice-candidate", async (data) => {
+            const candidate = new RTCIceCandidate(data.candidate);
             if (!pc) {
-              pendingCandidates.push(new RTCIceCandidate(data.candidate));
+              pendingCandidates.push(candidate);
+              log("Queued ICE candidate");
               return;
             }
             try {
-              await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+              await pc.addIceCandidate(candidate);
+              log("Added ICE candidate");
             } catch (err) {
-              log(`ICE error: ${err.message}`);
+              log("ICE add error: " + err.message);
             }
           });
 
           socket.on("call-ended", () => {
             log("Call ended");
-            if (pc) {
-              pc.close();
-              pc = null;
-              lastStreamId = null;
-            }
-            currentPeerId = null;
-            remoteVideo.srcObject = null;
+            cleanupCall();
           });
 
           socket.on("call-rejected", (data) => {
             log(`Call rejected: ${data?.reason || "unknown"}`);
+            cleanupCall();
           });
         };
         script.onerror = () => {
@@ -383,29 +484,125 @@
 
       const disconnectSocket = () => {
         if (socket) {
-          socket.disconnect();
+          try {
+            socket.disconnect();
+          } catch (e) {}
           socket = null;
           log("Socket disconnected");
         }
-        if (pc) {
-          pc.close();
-          pc = null;
-          lastStreamId = null;
-        }
+        cleanupCall();
         if (localStream) {
-          localStream.getTracks().forEach((track) => track.stop());
+          try {
+            localStream.getTracks().forEach((track) => track.stop());
+          } catch (e) {}
           localStream = null;
           localVideo.srcObject = null;
         }
-        currentPeerId = null;
-        remoteVideo.srcObject = null;
+        userInfoEl.textContent = "";
       };
 
+      // ---------- Caller: send offer ----------
+      const startCallAsCaller = async () => {
+        const calleeId = calleeIdInput.value.trim();
+        if (!socket) {
+          log("Socket not connected");
+          return;
+        }
+        if (!calleeId) {
+          log("Provide callee id");
+          return;
+        }
+
+        // prepare PC
+        createPeerConnection();
+        currentPeerId = calleeId;
+
+        // get local stream and add tracks
+        const stream = await getLocalStream();
+        if (stream) {
+          stream.getTracks().forEach((track) => {
+            pc.addTrack(track, stream);
+          });
+          log("Local tracks added to PeerConnection (caller)");
+        }
+
+        try {
+          const offer = await pc.createOffer();
+          await pc.setLocalDescription(offer);
+
+          // Send the offer to server (server should forward to callee)
+          socket.emit("offer", {
+            to: calleeId,
+            offer, // full RTCSessionDescription
+          });
+
+          log("Offer created and sent to " + calleeId);
+          // start ringtone for outgoing call (will stop when answer arrives)
+          startRingtone();
+        } catch (err) {
+          log("Error creating/sending offer: " + err.message);
+        }
+      };
+
+      // ---------- End / cleanup ----------
+      const cleanupCall = () => {
+        stopRingtone();
+        try {
+          if (pc) {
+            try {
+              pc.getSenders().forEach((s) => s.track && s.track.stop());
+            } catch (e) {}
+            pc.close();
+          }
+        } catch (e) {
+          // ignore
+        }
+        pc = null;
+        currentPeerId = null;
+        lastStreamId = null;
+        if (remoteVideo) remoteVideo.srcObject = null;
+        log("Call cleaned up");
+      };
+
+      // Hangup local tracks only (keeps pc open) - helpful while debugging
+      const hangupLocal = () => {
+        if (!localStream) return;
+        try {
+          localStream.getTracks().forEach((t) => t.stop());
+        } catch (e) {}
+        localStream = null;
+        localVideo.srcObject = null;
+        log("Local media stopped (hangup local)");
+      };
+
+      // End / notify remote
+      const endCall = () => {
+        if (socket && currentPeerId) {
+          socket.emit("end-call", { to: currentPeerId });
+        }
+        cleanupCall();
+      };
+
+      // ---------- UI hooks ----------
       connectBtn.addEventListener("click", connectSocket);
       disconnectBtn.addEventListener("click", disconnectSocket);
       toggleAudioBtn.addEventListener("click", toggleAudio);
       toggleVideoBtn.addEventListener("click", toggleVideo);
+      callBtn.addEventListener("click", startCallAsCaller);
+      endCallBtn.addEventListener("click", endCall);
+      hangupLocalBtn.addEventListener("click", hangupLocal);
       document.body.addEventListener("click", safePlay);
+
+      // -------------------------
+      // Quick usage notes (visible in logs)
+      // -------------------------
+      log("Page loaded. Fill socket URL + token then Connect.");
+      log(
+        "To call: enter callee id and press Call. When finished press End Call.",
+      );
+      log(
+        "This page sends 'offer' events and listens for 'answer' and 'ice-candidate'.",
+      );
     </script>
   </body>
 </html>

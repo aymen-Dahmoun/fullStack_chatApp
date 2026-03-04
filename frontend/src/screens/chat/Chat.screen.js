@@ -12,12 +12,12 @@ import {
 import useChat from "../../hooks/useChat";
 import { useAuth } from "../../context/authContext";
 import Message from "../../comps/Message";
-import { useSocket } from "../../hooks/useSocket";
 import { useColorScheme } from "nativewind";
 import ProfileIcon from "../../comps/ProfileIcon";
 import { createConversation } from "../../utils/createConversation.utils";
 import { useIsFocused } from "@react-navigation/native";
 import { FontAwesome } from "@expo/vector-icons";
+import { useSocket } from "../../context/socketContext";
 
 export default function ChatScreen({ route, navigation }) {
   const conversationId = route?.params?.conversationId || "";

@@ -12,6 +12,7 @@ import ChatScreen from "./src/screens/chat/Chat.screen";
 import CallScreen from "./src/screens/chat/Call.screen";
 import Profile from "./src/screens/Profile/Proile";
 import SettingsScreen from "./src/screens/Profile/Settings";
+import CallListener from "./src/comps/CallListener";
 
 const Stack = createStackNavigator();
 
@@ -28,42 +29,45 @@ const AuthStack = () => (
 );
 
 const UserStack = () => (
-  <Stack.Navigator
-    initialRouteName="Messages"
-    screenOptions={{
-      headerShown: false,
-    }}
-  >
-    <Stack.Screen name="Messages">
-      {() => (
-        <MainLayout>
-          <ListScreen />
-        </MainLayout>
-      )}
-    </Stack.Screen>
-    <Stack.Screen name="Chat">
-      {(props) => (
-        <MainLayout>
-          <ChatScreen {...props} />
-        </MainLayout>
-      )}
-    </Stack.Screen>
-    <Stack.Screen name="Call" component={CallScreen}></Stack.Screen>
-    <Stack.Screen name="Profile">
-      {() => (
-        <MainLayout>
-          <Profile />
-        </MainLayout>
-      )}
-    </Stack.Screen>
-    <Stack.Screen name="Settings">
-      {() => (
-        <MainLayout>
-          <SettingsScreen />
-        </MainLayout>
-      )}
-    </Stack.Screen>
-  </Stack.Navigator>
+  <>
+    <CallListener />
+    <Stack.Navigator
+      initialRouteName="Messages"
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Stack.Screen name="Messages">
+        {() => (
+          <MainLayout>
+            <ListScreen />
+          </MainLayout>
+        )}
+      </Stack.Screen>
+      <Stack.Screen name="Chat">
+        {(props) => (
+          <MainLayout>
+            <ChatScreen {...props} />
+          </MainLayout>
+        )}
+      </Stack.Screen>
+      <Stack.Screen name="Call" component={CallScreen}></Stack.Screen>
+      <Stack.Screen name="Profile">
+        {() => (
+          <MainLayout>
+            <Profile />
+          </MainLayout>
+        )}
+      </Stack.Screen>
+      <Stack.Screen name="Settings">
+        {() => (
+          <MainLayout>
+            <SettingsScreen />
+          </MainLayout>
+        )}
+      </Stack.Screen>
+    </Stack.Navigator>
+  </>
 );
 
 export default function MainRouter() {

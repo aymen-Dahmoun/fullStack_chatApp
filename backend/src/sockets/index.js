@@ -32,7 +32,7 @@ const emitToUser = (io, userId, event, payload) => {
 };
 
 export const initSocket = (server) => {
-  const clientOrigin = process.env.IP_ADDRESS_LINK.replace(/"/g, "")
+  const clientOrigin = process.env.IP_ADDRESS_LINK.replace(/"/g, "");
 
   const io = new Server(server, {
     cors: {
@@ -46,6 +46,7 @@ export const initSocket = (server) => {
   io.on("connection", (socket) => {
     const userId = socket.user.id;
     addUserSocket(userId, socket.id);
+    console.log("online users", onlineUsers);
 
     console.log(`User connected: ${socket.id}, user: ${socket.user.username}`);
 
@@ -115,7 +116,7 @@ export const initSocket = (server) => {
     socket.on("call user", (data) => {
       const { receiverId, signalData, from, name } = data;
       emitToUser(io, receiverId, "incoming call", {
-        signal: signalData, // offer (SDP)
+        signal: signalData,
         from,
         name,
       });
