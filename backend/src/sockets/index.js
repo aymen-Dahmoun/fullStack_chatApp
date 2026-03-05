@@ -87,7 +87,7 @@ export const initSocket = (server) => {
     socket.on("offer", (data) => {
       const { to, offer } = data || {};
       console.log(
-        `Offer received from ${userId} -> ${to}. Active sockets: ${
+        `Offer received from ${userId} => ${to}. Active sockets: ${
           onlineUsers.get(to)?.size || 0
         }`,
       );
@@ -137,12 +137,6 @@ export const initSocket = (server) => {
       });
     });
 
-    socket.on("end call", (data) => {
-      const { to } = data;
-      emitToUser(io, to, "call ended", {
-        from: socket.user.id,
-      });
-    });
     socket.on("ice-candidate", (data) => {
       const { to, candidate } = data;
       emitToUser(io, to, "ice-candidate", {

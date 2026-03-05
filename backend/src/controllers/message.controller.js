@@ -8,30 +8,27 @@ export const getConversations = async (req, res) => {
 
     const conversations = await sequelize.models.Conversation.findAll({
       where: {
-        [Op.or]: [
-          { userId: userId },
-          { messengerId: userId }
-        ]
+        [Op.or]: [{ userId: userId }, { messengerId: userId }],
       },
       include: [
         {
           model: sequelize.models.Message,
-          as: 'messages',
+          as: "messages",
           include: [
             {
               model: sequelize.models.User,
-              as: 'sender',
-              attributes: ['id', 'username', 'email']
-            }
-          ]
+              as: "sender",
+              attributes: ["id", "username", "email"],
+            },
+          ],
         },
         {
           model: sequelize.models.User,
-          as: 'messenger',
-          attributes: ['id', 'username', 'email']
-        }
+          as: "messenger",
+          attributes: ["id", "username", "email"],
+        },
       ],
-      order: [['updatedAt', 'DESC']]
+      order: [["updatedAt", "DESC"]],
     });
 
     const uniquePairs = new Set();
@@ -40,25 +37,34 @@ export const getConversations = async (req, res) => {
     for (const convo of conversations) {
       const id1 = convo.userId;
       const id2 = convo.messengerId;
-      const pairKey = [id1, id2].sort().join('-');
+      const pairKey = [id1, id2].sort().join("-");
 
       if (!uniquePairs.has(pairKey)) {
         uniquePairs.add(pairKey);
 
-        const sortedMessages = convo.messages.sort((a, b) =>
-          new Date(b.createdAt) - new Date(a.createdAt)
+        const sortedMessages = convo.messages.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
         );
         const lastMessage = sortedMessages[0];
+
+        const otherUser =
+          convo.userId === userId
+            ? convo.messenger
+            : await sequelize.models.User.findByPk(convo.userId, {
+                attributes: ["id", "username", "email"],
+              });
 
         deduped.push({
           conversationId: convo.id,
           updatedAt: convo.updatedAt,
-          lastMessage: lastMessage ? {
-            content: lastMessage.content,
-            createdAt: lastMessage.createdAt,
-            sender: lastMessage.sender
-          } : null,
-          messenger: convo.messenger
+          lastMessage: lastMessage
+            ? {
+                content: lastMessage.content,
+                createdAt: lastMessage.createdAt,
+                sender: lastMessage.sender,
+              }
+            : null,
+          messenger: otherUser,
         });
       }
     }
@@ -75,7 +81,9 @@ export const createConversation = async (req, res) => {
     const { userId, messengerId } = req.body;
 
     if (!userId || !messengerId) {
-      return res.status(400).json({ error: 'userId and messengerId are required' });
+      return res
+        .status(400)
+        .json({ error: "userId and messengerId are required" });
     }
 
     const existingConversation = await Conversation.findOne({
@@ -87,7 +95,7 @@ export const createConversation = async (req, res) => {
 
     if (existingConversation) {
       return res.status(200).json({
-        message: 'Conversation already exists',
+        message: "Conversation already exists",
         conversation: existingConversation,
       });
     }
@@ -98,11 +106,11 @@ export const createConversation = async (req, res) => {
     });
 
     return res.status(201).json({
-      message: 'Conversation created successfully',
+      message: "Conversation created successfully",
       conversation,
     });
   } catch (error) {
-    console.error('Error creating conversation:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error("Error creating conversation:", error);
+    return res.status(500).json({ error: "Internal server error" });
   }
 };

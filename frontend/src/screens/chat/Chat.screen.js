@@ -149,113 +149,105 @@ export default function ChatScreen({ route, navigation }) {
 
   return (
     <View className="flex-1 bg-white pt-12 dark:bg-gray-950">
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-        keyboardVerticalOffset={Platform.OS === "android" ? 80 : 0}
-      >
-        <View className="flex-row items-center gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
-          <ProfileIcon username={messengerUsername} size={40} />
-          <View className="flex-1">
-            <Text className="text-base font-semibold text-gray-800 dark:text-gray-100">
-              {messengerUsername}
-            </Text>
-          </View>
-          <TouchableOpacity
-            onPress={() => {
-              if (!messenger?.id) return;
+      <View className="flex-row items-center gap-4 px-4 py-3 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-950">
+        <ProfileIcon username={messengerUsername} size={40} />
+        <View className="flex-1">
+          <Text className="text-base font-semibold text-gray-800 dark:text-gray-100">
+            {messengerUsername}
+          </Text>
+        </View>
+        <TouchableOpacity
+          onPress={() => {
+            if (!messenger?.id) return;
 
-              navigation.navigate("Call", {
-                peerId: messenger.id,
-                peerName: messengerUsername,
-                isCaller: true,
-              });
-            }}
-            className={`p-3 m-2 rounded-full border-2 ${
-              colorScheme === "dark"
-                ? "border-blue-200 bg-blue-200/10"
-                : "border-blue-300 bg-blue-300/10"
-            }`}
-          >
+            navigation.navigate("Call", {
+              peerId: messenger.id,
+              peerName: messengerUsername,
+              isCaller: true,
+            });
+          }}
+          className={`p-3 m-2 rounded-full border-2 ${
+            colorScheme === "dark"
+              ? "border-blue-200 bg-blue-200/10"
+              : "border-blue-300 bg-blue-300/10"
+          }`}
+        >
+          <FontAwesome
+            name="phone"
+            size={22}
+            color={colorScheme === "dark" ? "#bfdbfe" : "#93c5fd"}
+          />
+        </TouchableOpacity>
+      </View>
+
+      {loading && messages.length === 0 && !newConversation ? (
+        <View className="flex-1 items-center justify-center bg-inherit">
+          <ActivityIndicator
+            size="large"
+            color="#007aff"
+            className="bg-inherit"
+          />
+        </View>
+      ) : (
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={(item) => item.id?.toString() || item.tempId}
+          contentContainerStyle={{ padding: 12, flexGrow: 1 }}
+          inverted={!newConversation}
+          showsVerticalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <Message
+              content={item.content}
+              senderName={item.sender?.username || "Unknown"}
+              isSignedUser={user.id === item.sender?.id}
+              timestamp={item.createdAt}
+              isPending={item.isPending}
+            />
+          )}
+          ListEmptyComponent={() => (
+            <View className="flex-1 items-center justify-center py-20">
+              <Text className="text-gray-500 text-lg">No messages yet</Text>
+            </View>
+          )}
+        />
+      )}
+
+      <View className="flex-row items-center p-3 bg-white border-t border-gray-200 dark:bg-gray-950 dark:border-neutral-700">
+        <TextInput
+          style={{
+            borderWidth: 0.5,
+            fontSize: 18,
+            color: `${colorScheme === "dark" ? "#edebeb" : "#050505"}`,
+          }}
+          className="flex-1 border-neutral-400 rounded-lg p-4 mr-5"
+          placeholder="Type a message..."
+          placeholderTextColor={colorScheme === "dark" ? "#9ca3af" : "#999999"}
+          value={newMessage}
+          onChangeText={setNewMessage}
+          multiline
+          textAlignVertical="center"
+        />
+        <TouchableOpacity
+          onPress={handleSend}
+          disabled={!newMessage.trim() || isSending}
+          className={`px-4 py-3 rounded-full items-center justify-center ${
+            newMessage.trim() && !isSending
+              ? "bg-sky-700 dark:bg-slate-700"
+              : "bg-gray-300"
+          }`}
+        >
+          {isSending ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : (
             <FontAwesome
-              name="phone"
-              size={22}
-              color={colorScheme === "dark" ? "#bfdbfe" : "#93c5fd"}
+              name="paper-plane"
+              size={18}
+              color={newMessage.trim() && !isSending ? "white" : "#6b7280"}
             />
-          </TouchableOpacity>
-        </View>
-
-        {loading && messages.length === 0 && !newConversation ? (
-          <View className="flex-1 items-center justify-center bg-inherit">
-            <ActivityIndicator
-              size="large"
-              color="#007aff"
-              className="bg-inherit"
-            />
-          </View>
-        ) : (
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            keyExtractor={(item) => item.id?.toString() || item.tempId}
-            contentContainerStyle={{ padding: 12, flexGrow: 1 }}
-            inverted={!newConversation}
-            showsVerticalScrollIndicator={false}
-            renderItem={({ item }) => (
-              <Message
-                content={item.content}
-                senderName={item.sender?.username || "Unknown"}
-                isSignedUser={user.id === item.sender?.id}
-                timestamp={item.createdAt}
-                isPending={item.isPending}
-              />
-            )}
-            ListEmptyComponent={() => (
-              <View className="flex-1 items-center justify-center py-20">
-                <Text className="text-gray-500 text-lg">No messages yet</Text>
-              </View>
-            )}
-          />
-        )}
-
-        <View className="flex-row items-center p-3 bg-white border-t border-gray-200 dark:bg-gray-950 dark:border-neutral-700">
-          <TextInput
-            style={{
-              borderWidth: 0.5,
-              fontSize: 18,
-              color: `${colorScheme === "dark" ? "#edebeb" : "#050505"}`,
-            }}
-            className="flex-1 border-neutral-400 rounded-lg p-4 mr-5"
-            placeholder="Type a message..."
-            placeholderTextColor={
-              colorScheme === "dark" ? "#9ca3af" : "#999999"
-            }
-            value={newMessage}
-            onChangeText={setNewMessage}
-            multiline
-            textAlignVertical="center"
-          />
-          <TouchableOpacity
-            onPress={handleSend}
-            disabled={!newMessage.trim() || isSending}
-            className={`px-4 py-3 rounded-full items-center justify-center ${
-              newMessage.trim() && !isSending
-                ? "bg-sky-700 dark:bg-slate-700"
-                : "bg-gray-300"
-            }`}
-          >
-            {isSending ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <FontAwesome
-                name="paper-plane"
-                size={18}
-                color={newMessage.trim() && !isSending ? "white" : "#6b7280"}
-              />
-            )}
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

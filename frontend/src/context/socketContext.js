@@ -1,20 +1,14 @@
-import React, {
-  createContext,
-  useState,
-  useEffect,
-  useContext,
-  useRef,
-} from "react";
+import React, { createContext, useState, useEffect, useContext } from "react";
 import { io } from "socket.io-client";
 import * as SecureStore from "expo-secure-store";
 
 const SocketContext = createContext(null);
 
 export const SocketProvider = ({ children }) => {
-  const socketRef = useRef(null);
-
+  const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [incomingCall, setIncomingCall] = useState(null);
 
   const connectSocket = async () => {
     const token = await SecureStore.getItemAsync("token");
@@ -24,36 +18,44 @@ export const SocketProvider = ({ children }) => {
       return;
     }
 
-    if (socketRef.current) return;
+    if (socket) return;
 
-    const socket = io(process.env.EXPO_PUBLIC_API_LINK, {
+    const newSocket = io(process.env.EXPO_PUBLIC_API_LINK, {
       transports: ["websocket"],
       auth: { token },
       autoConnect: true,
     });
 
-    socket.on("connect", () => {
-      console.log("socket connected:", socket.id);
+    newSocket.on("connect", () => {
+      console.log("socket connected:", newSocket.id);
       setIsConnected(true);
     });
 
-    socket.on("disconnect", (reason) => {
+    newSocket.on("disconnect", (reason) => {
       console.log("socket disconnected:", reason);
       setIsConnected(false);
     });
 
-    socket.on("connect_error", (err) => {
+    newSocket.on("connect_error", (err) => {
       console.log("socket connection error:", err.message);
     });
 
-    socketRef.current = socket;
+    newSocket.on("offer", (data) => {
+      console.log("Incoming call (offer received):", data);
+      setIncomingCall(data);
+    });
+    newSocket.onAny((event, ...args) => {
+      console.log("Received event:", event, args);
+    });
+
+    setSocket(newSocket);
     setLoading(false);
   };
 
   const disconnectSocket = () => {
-    if (socketRef.current) {
-      socketRef.current.disconnect();
-      socketRef.current = null;
+    if (socket) {
+      socket.disconnect();
+      setSocket(null);
       setIsConnected(false);
     }
   };
@@ -69,11 +71,13 @@ export const SocketProvider = ({ children }) => {
   return (
     <SocketContext.Provider
       value={{
-        socket: socketRef.current,
+        socket,
         isConnected,
+        loading,
         reconnect: connectSocket,
         disconnect: disconnectSocket,
-        loading,
+        incomingCall,
+        setIncomingCall,
       }}
     >
       {children}

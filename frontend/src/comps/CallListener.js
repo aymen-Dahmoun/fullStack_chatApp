@@ -3,28 +3,21 @@ import { useSocket } from "../context/socketContext";
 import { useNavigation } from "@react-navigation/native";
 
 export default function CallListener() {
-  const { socket } = useSocket();
+  const { incomingCall, setIncomingCall } = useSocket();
   const navigation = useNavigation();
 
   useEffect(() => {
-    console.log("CallListener here");
-    if (!socket) return;
+    console.log("Incoming call:", incomingCall);
 
-    const handleIncomingCall = (data) => {
-      console.log("Incoming call:", data);
+    if (!incomingCall) return;
+    console.log("Incoming call:", incomingCall);
 
-      navigation.navigate("Call", {
-        incoming: true,
-        callerData: data,
-      });
-    };
-
-    socket.on("incoming call", handleIncomingCall);
-
-    return () => {
-      socket.off("incoming call", handleIncomingCall);
-    };
-  }, [socket]);
+    navigation.navigate("Call", {
+      offer: incomingCall,
+      isCaller: false,
+    });
+    setIncomingCall(null);
+  }, [incomingCall]);
 
   return null;
 }

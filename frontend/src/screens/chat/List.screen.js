@@ -3,13 +3,15 @@ import { View, Text, FlatList, ActivityIndicator } from "react-native";
 import useConversation from "../../hooks/useConversation";
 import ChatElement from "../../comps/ChatElement";
 import AuthBackground from "../../comps/AuthBackground";
-import bg_image from '../../../assets/wwwhirl.png'
+import bg_image from "../../../assets/wwwhirl.png";
 import SearchBar from "../../comps/SearchBar";
 
 export default function ListScreen() {
   const { data, loading, error } = useConversation();
+  console.log("condversations", data);
 
-  if (loading) return <ActivityIndicator size={80} className="dark:bg-black h-screen" />;
+  if (loading)
+    return <ActivityIndicator size={80} className="dark:bg-black h-screen" />;
   if (error)
     return (
       <Text className="text-red-500 text-center mt-4">
@@ -19,7 +21,11 @@ export default function ListScreen() {
 
   return (
     <View className="flex-1 bg-white px-2 pt-20 dark:bg-black">
-      <AuthBackground secondImage={bg_image} mainImage={bg_image} thirdImage={bg_image} />
+      <AuthBackground
+        secondImage={bg_image}
+        mainImage={bg_image}
+        thirdImage={bg_image}
+      />
       <SearchBar />
       <FlatList
         data={data}

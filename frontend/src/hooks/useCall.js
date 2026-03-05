@@ -197,16 +197,16 @@ export function useCall({ route, navigation, socket, isConnected }) {
   useEffect(() => {
     if (!socket) return;
 
-    const handleOffer = (data) => {
-      console.log("Offer received:", data?.from);
-      if (callStatus === "in-call") {
-        socket.emit("reject-call", { to: data.from, reason: "busy" });
-        return;
-      }
-      peerIdRef.current = data.from;
-      setIncomingOffer(data);
-      setCallStatus("incoming");
-    };
+    // const handleOffer = (data) => {
+    //   console.log("Offer received:", data?.from);
+    //   if (callStatus === "in-call") {
+    //     socket.emit("reject-call", { to: data.from, reason: "busy" });
+    //     return;
+    //   }
+    //   peerIdRef.current = data.from;
+    //   setIncomingOffer(data);
+    //   setCallStatus("incoming");
+    // };
 
     const handleAnswer = async (data) => {
       console.log("Answer received from:", data?.from);
@@ -258,7 +258,7 @@ export function useCall({ route, navigation, socket, isConnected }) {
       if (navigation?.goBack) navigation.goBack();
     };
 
-    socket.on("offer", handleOffer);
+    // socket.on("offer", handleOffer);
     socket.on("answer", handleAnswer);
     socket.on("ice-candidate", handleIce);
     socket.on("call-ended", handleCallEnded);
@@ -266,7 +266,7 @@ export function useCall({ route, navigation, socket, isConnected }) {
     socket.on("user-offline", handleUserOffline);
 
     return () => {
-      socket.off("offer", handleOffer);
+      // socket.off("offer", handleOffer);
       socket.off("answer", handleAnswer);
       socket.off("ice-candidate", handleIce);
       socket.off("call-ended", handleCallEnded);
